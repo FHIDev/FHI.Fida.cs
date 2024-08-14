@@ -46,14 +46,9 @@ jobs:
       run: docker push ghcr.io/${{ env.REPO_NAME }}/cs9base:${{ env.VERSION }}        
       
     - name: Clean up untagged Docker images
-      run: |
-        # Fetch all images and filter out the ones with no tags
-        images=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/orgs/FHIDev/packages/container/fhi.fida.cs/versions" \
-          | jq -r '.[] | select(.metadata.container.tags == null) | .id')
-    
-        # Loop through the untagged images and delete them
-        for image_id in $images; do
-          curl -X DELETE -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/orgs/FHIDev/packages/container/fhi.fida.cs/versions/$image_id"
-        done
+      uses: actions/delete-package-versions@v5
+      with: 
+        package-name: 'fhi.fida.cs/cs9base'
+        package-type: 'container'
+        min-versions-to-keep: 0
+        delete-only-untagged-versions: 'true'
