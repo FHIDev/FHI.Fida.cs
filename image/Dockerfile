@@ -1,4 +1,4 @@
-FROM ghcr.io/fhidev/fhi.fida.cs/cs9base:4.4.1
+FROM ghcr.io/fhidev/fhi.fida.cs/cs9base:latest
 
 # Set default env values
 ENV DEBIAN_FRONTEND=noninteractive
