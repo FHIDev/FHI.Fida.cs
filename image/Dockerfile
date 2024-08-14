@@ -11,3 +11,4 @@ RUN chmod +x /usr/local/bin/install_ss_and_run_task.sh
 
 ### install surveillance systems
 RUN R -e 'devtools::install_github("csids/cs9example", upgrade="never")'
+
