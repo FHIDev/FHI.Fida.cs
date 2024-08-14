@@ -4,7 +4,9 @@ on:
   push:
     branches: [ "cs9base-*" ]
   workflow_dispatch:
-  
+  schedule:
+    - cron: "0 18 * * *"  # Runs every day at 18:00 UTC (6:00 PM UTC)
+    
 jobs:
 
   build:
@@ -20,3 +22,17 @@ jobs:
 
     - name: Build the Docker image
       run: cd image && docker build . --tag cs9base:${{ env.VERSION }}
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build the Docker image
+      run: cd image && docker build . --tag ghcr.io/${{ github.repository }}/cs9base:${{ env.VERSION }}
+
+    - name: Push the Docker image to GHCR
+      run: docker push ghcr.io/${{ github.repository }}/cs9base:${{ env.VERSION }}
+      
