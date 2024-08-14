@@ -23,6 +23,9 @@ jobs:
       id: extract_version
       run: echo "VERSION=${GITHUB_REF#refs/heads/cs9base-}" >> $GITHUB_ENV
 
+    - name: Set lowercase repository name as environment variable
+      run: echo "REPO_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
     - name: Build the Docker image
       run: cd image && docker build . --tag cs9base:${{ env.VERSION }}
 
@@ -34,13 +37,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build the Docker image
-      run: |
-        repo_lower=$(echo "${GITHUB_REPOSITORY,,}")
-        cd image
-        docker build . --tag ghcr.io/${repo_lower}/cs9base:${{ env.VERSION }}
+      run: cd image && docker build . --tag ghcr.io/${{ env.REPO_NAME }}/cs9base:${{ env.VERSION }}
         
     - name: Push the Docker image to GHCR
-      run: |
-        repo_lower=$(echo "${GITHUB_REPOSITORY,,}")
-        docker push ghcr.io/${repo_lower}/cs9base:${{ env.VERSION }}      
-        
+      run: docker push ghcr.io/${{ env.REPO_NAME }}/cs9base:${{ env.VERSION }}        
