@@ -40,10 +40,13 @@ jobs:
       run: cd image && docker build . --tag cs9base:${{ env.VERSION }}
 
     - name: Build the Docker image
-      run: cd image && docker build . --tag ghcr.io/${{ env.REPO_NAME }}/cs9base:${{ env.VERSION }}
+      run: cd image && docker build . --tag ghcr.io/${{ env.REPO_NAME }}/cs9base:${{ env.VERSION }} --tag ghcr.io/${{ env.REPO_NAME }}/cs9base:latest
         
-    - name: Push the Docker image to GHCR
-      run: docker push ghcr.io/${{ env.REPO_NAME }}/cs9base:${{ env.VERSION }}        
+    - name: Push the Docker image to GHCR (versioned)
+      run: docker push ghcr.io/${{ env.REPO_NAME }}/cs9base:${{ env.VERSION }}    
+      
+    - name: Push the Docker image to GHCR (latest)
+      run: docker push ghcr.io/${{ env.REPO_NAME }}/cs9base:latest
       
     - name: Clean up untagged Docker images
       uses: actions/delete-package-versions@v5
