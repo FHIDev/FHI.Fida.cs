@@ -19,4 +19,4 @@ jobs:
       run: echo "VERSION=${GITHUB_REF#refs/heads/cs9base-}" >> $GITHUB_ENV
 
     - name: Build the Docker image
-      run: cd image & docker build . --tag cs9base:${{ env.VERSION }}
+      run: cd image & pwd & ls & docker build . --tag cs9base:${{ env.VERSION }}
