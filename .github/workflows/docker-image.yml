@@ -2,7 +2,7 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "cs9base-4.4.1" ]
+    branches: [ "cs9base-*" ]
   workflow_dispatch:
   
 jobs:
@@ -13,5 +13,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Extract version from branch name
+      id: extract_version
+      run: echo "VERSION=${GITHUB_REF#refs/heads/cs9base-}" >> $GITHUB_ENV
+
     - name: Build the Docker image
-      run: docker build . --file image/Dockerfile --tag cs9base:4.4.1
+      run: docker build . --file image/Dockerfile --tag cs9base:${{ env.VERSION }}
