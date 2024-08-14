@@ -31,8 +31,13 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build the Docker image
-      run: cd image && docker build . --tag ghcr.io/${{ github.repository }}/cs9base:${{ env.VERSION }}
-
+      run: |
+        repo_lower=$(echo "${GITHUB_REPOSITORY,,}")
+        cd image
+        docker build . --tag ghcr.io/${repo_lower}/cs9base:${{ env.VERSION }}
+        
     - name: Push the Docker image to GHCR
-      run: docker push ghcr.io/${{ github.repository }}/cs9base:${{ env.VERSION }}
-      
+      run: |
+        repo_lower=$(echo "${GITHUB_REPOSITORY,,}")
+        docker push ghcr.io/${repo_lower}/cs9base:${{ env.VERSION }}      
+        
