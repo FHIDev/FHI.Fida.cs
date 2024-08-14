@@ -7,6 +7,8 @@ for branch in $branches; do
   # Checkout the branch
   git checkout $branch
   
+  git pull
+  
   # Merge the .github directory from main
   git checkout main -- .github
   
