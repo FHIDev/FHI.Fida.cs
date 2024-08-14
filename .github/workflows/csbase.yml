@@ -41,3 +41,16 @@ jobs:
         
     - name: Push the Docker image to GHCR
       run: docker push ghcr.io/${{ env.REPO_NAME }}/cs9base:${{ env.VERSION }}        
+      
+    - name: Clean up untagged Docker images
+      run: |
+        # Fetch all images and filter out the ones with no tags
+        images=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/orgs/your-organization/packages/container/your-repository/versions" \
+          | jq -r '.[] | select(.metadata.container.tags == null) | .id')
+    
+        # Loop through the untagged images and delete them
+        for image_id in $images; do
+          curl -X DELETE -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/orgs/your-organization/packages/container/your-repository/versions/$image_id"
+        done
