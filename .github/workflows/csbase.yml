@@ -26,7 +26,7 @@ jobs:
         ref: main
     
     - name: Switch to cs9base-${{ env.VERSION }} branch
-      run: git switch cs9base-${{ env.VERSION }}
+      run: git fetch && git checkout cs9base-${{ env.VERSION }}
 
     - name: Set lowercase repository name as environment variable
       run: echo "REPO_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
