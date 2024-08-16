@@ -1,14 +1,15 @@
 name: Build csbase
 
+env:
+  VERSION: 4.4.1
+
 on:
-  push:
-    branches: [ "cs9base-*" ]
   workflow_dispatch:
   schedule:
     - cron: "0 18 * * *"  # Runs every day at 18:00 UTC (6:00 PM UTC)
 
 concurrency:
-  group: cs9base-${{ github.ref }}
+  group: cs9base-${{ env.VERSION }}
 
 jobs:
 
@@ -21,10 +22,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-
-    - name: Extract version from branch name
-      id: extract_version
-      run: echo "VERSION=${GITHUB_REF#refs/heads/cs9base-}" >> $GITHUB_ENV
+      with:
+        ref: main
+    
+    - name: Switch to cs9base-${{ env.VERSION }} branch
+      run: git checkout cs9base-${{ env.VERSION }}
 
     - name: Set lowercase repository name as environment variable
       run: echo "REPO_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
@@ -46,7 +48,6 @@ jobs:
       run: docker push ghcr.io/${{ env.REPO_NAME }}/cs9base:${{ env.VERSION }}    
       
     - name: Retag and push image (latest)
-      if: env.VERSION == '4.4.1'
       run: |
         docker tag ghcr.io/${{ env.REPO_NAME }}/cs9base:${{ env.VERSION }} ghcr.io/${{ env.REPO_NAME }}/cs9base:latest
         docker push ghcr.io/${{ env.REPO_NAME }}/cs9base:latest
