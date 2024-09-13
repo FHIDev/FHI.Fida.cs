@@ -1,1 +1,1 @@
-FROM redis:latest
+FROM postgres:13
