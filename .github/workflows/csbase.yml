@@ -6,7 +6,7 @@ env:
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 18 * * *"  # Runs every day at 18:00 UTC (6:00 PM UTC)
+    - cron: "0 15 * * *"  # Runs every day at 18:00 UTC (6:00 PM UTC)
 
 concurrency:
   group: cs9base

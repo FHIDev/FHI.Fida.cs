@@ -3,7 +3,7 @@ name: Build csredis
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 19 * * *"  # Runs every day at 19:00 UTC (7:00 PM UTC)
+    - cron: "0 15 * * *"  # Runs every day at 19:00 UTC (7:00 PM UTC)
 
 concurrency:
   group: csredis
