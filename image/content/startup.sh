@@ -41,8 +41,18 @@ touch /var/log/rstudio-server.log
 unset RSP_LICENSE
 unset RSP_LICENSE_SERVER
 
-# Create users
+# Stuff that is shared from the live mount
+cp /shared/list_of_users.sh /usr/local/bin/list_of_users.sh
+chmod +x /usr/local/bin/list_of_users.sh
 /usr/local/bin/list_of_users.sh
+
+cp /shared/openid-client-secret /etc/rstudio/openid-client-secret
+chmod 0600 /etc/rstudio/openid-client-secret
+
+cp /shared/licence_file /var/lib/rstudio-server/licence_file
+chmod 444 /var/lib/rstudio-server-licence_file
+rstudio-server license-manager deactivate
+rstudio-server license-manager activate-file /var/lib/rstudio-server/licence_file
 
 # start folder moutns
 # automount
