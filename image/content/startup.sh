@@ -3,14 +3,16 @@
 set -e
 set -x
 
-# Stuff that is shared from the live mount
+# Live mount - Create list of users
 cp /shared/list_of_users.sh /usr/local/bin/list_of_users.sh
 chmod +x /usr/local/bin/list_of_users.sh
 /usr/local/bin/list_of_users.sh
 
+# Live mount - openid
 cp /shared/openid-client-secret /etc/rstudio/openid-client-secret
 chmod 0600 /etc/rstudio/openid-client-secret
 
+# Live mount - Activate workbench licence file
 cp /shared/licence_file /var/lib/rstudio-server/licence_file
 chmod 444 /var/lib/rstudio-server-licence_file
 rstudio-server license-manager deactivate
