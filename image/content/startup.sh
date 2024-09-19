@@ -42,10 +42,7 @@ unset RSP_LICENSE
 unset RSP_LICENSE_SERVER
 
 # Create users
-/usr/local/bin/create_user.sh p2932-richardaw 2000
-/usr/local/bin/create_user.sh p2932-gutormth 2001
-/usr/local/bin/create_user.sh p2932-augustsm 2002
-/usr/local/bin/create_user.sh p2932-larsen 2003
+/usr/local/bin/list_of_users.sh
 
 # start folder moutns
 # automount
