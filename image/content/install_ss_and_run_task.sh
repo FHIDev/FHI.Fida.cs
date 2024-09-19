@@ -1,10 +1,8 @@
 #!/bin/bash
 
-#!/bin/bash
-
-# Check if exactly two arguments are provided
-if [ "$#" -ne 3 ]; then
-  echo "Usage: $0 <username> <repository> <task>"
+# Check if at least three arguments are provided
+if [ "$#" -lt 3 ]; then
+  echo "Usage: $0 <username> <repository> <task> [ENV_VAR1=value1] [ENV_VAR2=value2] ..."
   exit 1
 fi
 
@@ -35,7 +33,7 @@ fi
 TARBALL=$(ls -t /${REPOSITORY}_*.tar.gz | head -n 1)
 
 if [ -z "$TARBALL" ]; then
-  echo "No tarball found for ${REPOSITORY} in /tmp"
+  echo "No tarball found for ${REPOSITORY} in /"
   exit 1
 fi
 
@@ -48,8 +46,14 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Run the specified R command
-Rscript -e "${REPOSITORY}::global\$ss\$run_task('${TASK}')"
+# Set environment variables
+ENV_COMMAND=""
+for var in "${@:4}"; do
+  ENV_COMMAND="${ENV_COMMAND}Sys.setenv(${var%%=*}='${var#*=}'); "
+done
+
+# Run the specified R command with environment variables
+Rscript -e "${ENV_COMMAND}${REPOSITORY}::global\$ss\$run_task('${TASK}')"
 
 # Check if the R command execution was successful
 if [ $? -ne 0 ]; then
