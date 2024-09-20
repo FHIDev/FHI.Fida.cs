@@ -14,7 +14,7 @@ chmod 0600 /etc/rstudio/openid-client-secret
 
 # Live mount - Activate workbench licence file
 cp /shared/licence_file /var/lib/rstudio-server/licence_file
-chmod 444 /var/lib/rstudio-server-licence_file
+chmod 444 /var/lib/rstudio-server/licence_file
 rstudio-server license-manager deactivate
 rstudio-server license-manager activate-file /var/lib/rstudio-server/licence_file
 
