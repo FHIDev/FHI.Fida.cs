@@ -9,11 +9,22 @@ fi
 USERNAME=$1
 REPOSITORY=$2
 TASK=$3
-BRANCH=${4:-main} # Default to 'main' if no branch is provided
+BRANCH=${4:-""} # Use empty string if branch is not provided
 REPO_URL="http://p2932-podman.tsd.usit.no:3000/${USERNAME}/${REPOSITORY}.git"
 
-# Clone the repository and checkout the specified branch
-git -C / clone -b "$BRANCH" "$REPO_URL"
+# Determine where environment variables start
+if [ -z "$BRANCH" ]; then
+  ENV_START=4
+else
+  ENV_START=5
+fi
+
+# Clone the repository and checkout the specified branch (if provided)
+if [ -z "$BRANCH" ]; then
+  git -C / clone "$REPO_URL"
+else
+  git -C / clone -b "$BRANCH" "$REPO_URL"
+fi
 
 # Check if the cloning was successful
 if [ $? -ne 0 ]; then
@@ -49,7 +60,7 @@ fi
 
 # Set environment variables
 ENV_COMMAND=""
-for var in "${@:5}"; do
+for var in "${@:$ENV_START}"; do
   ENV_COMMAND="${ENV_COMMAND}Sys.setenv(${var%%=*}='${var#*=}'); "
 done
 
