@@ -2,21 +2,22 @@
 
 # Check if at least three arguments are provided
 if [ "$#" -lt 3 ]; then
-  echo "Usage: $0 <username> <repository> <task> [ENV_VAR1=value1] [ENV_VAR2=value2] ..."
+  echo "Usage: $0 <username> <repository> <task> [branch] [ENV_VAR1=value1] [ENV_VAR2=value2] ..."
   exit 1
 fi
 
 USERNAME=$1
 REPOSITORY=$2
 TASK=$3
+BRANCH=${4:-main} # Default to 'main' if no branch is provided
 REPO_URL="http://p2932-podman.tsd.usit.no:3000/${USERNAME}/${REPOSITORY}.git"
 
-# Clone the repository
-git -C / clone "$REPO_URL"
+# Clone the repository and checkout the specified branch
+git -C / clone -b "$BRANCH" "$REPO_URL"
 
 # Check if the cloning was successful
 if [ $? -ne 0 ]; then
-  echo "Failed to clone repository from $REPO_URL"
+  echo "Failed to clone repository from $REPO_URL (branch: $BRANCH)"
   exit 1
 fi
 
@@ -48,7 +49,7 @@ fi
 
 # Set environment variables
 ENV_COMMAND=""
-for var in "${@:4}"; do
+for var in "${@:5}"; do
   ENV_COMMAND="${ENV_COMMAND}Sys.setenv(${var%%=*}='${var#*=}'); "
 done
 
