@@ -37,8 +37,6 @@ spec:
             cpu: 2000m
             memory: 4096Mi
         volumeMounts:
-#        - mountPath: /fhi_config/
-#          name: volume-config-app
         - mountPath: /cs9_secret/
           name: volume-akv-secret-1
       volumes:
