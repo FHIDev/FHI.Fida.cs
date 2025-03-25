@@ -27,7 +27,7 @@ spec:
 #      - image: wbitt/network-multitool
         name: ct-cs9
         ports:
-        - containerPort: 8080
+        - containerPort: 80
           name: cs9-port
         resources:
 #          limits:
