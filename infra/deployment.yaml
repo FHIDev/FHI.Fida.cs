@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: app-cs9-test
+#    fluentbit.fluent.io/enabled: "true"
+  name: deployment-cs9-test
+  namespace: ns-cs9-test
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  selector:
+    matchLabels:
+      app: app-cs9-test
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: app-cs9-test
+#        fluentbit.fluent.io/enabled: "true"
+    spec:
+      containers:
+#      - image: dhis2/core:2.41
+      - image: tutum/hello-world
+#      - image: wbitt/network-multitool
+        name: ct-cs9
+        ports:
+        - containerPort: 8080
+          name: cs9-port
+        resources:
+#          limits:
+#            cpu: 4000m
+#            memory: 8192Mi
+          requests:
+            cpu: 2000m
+            memory: 4096Mi
+        volumeMounts:
+#        - mountPath: /fhi_config/
+#          name: volume-config-app
+        - mountPath: /cs9_secret/
+          name: volume-akv-secret-1
+      volumes:
+      - csi:
+          driver: secrets-store.csi.k8s.io
+          nodePublishSecretRef:
+            name: secret-akv-sp           # Service principal secret
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: akv-cs9-test
+        name: volume-akv-secret-1
