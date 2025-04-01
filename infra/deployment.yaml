@@ -23,7 +23,8 @@ spec:
     spec:
       containers:
 #      - image: dhis2/core:2.41
-      - image: tutum/hello-world
+#      - image: tutum/hello-world
+      - image: chesscorp/chess-club
 #      - image: wbitt/network-multitool
         name: ct-cs9
         ports:
