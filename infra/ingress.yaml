@@ -21,6 +21,7 @@ spec:
             name: service-cs9-test
             port:
               number: 80
+              targetPort: 8787  # Container port
   tls:
     - hosts:
         - cs9-test.fhi-k8s.com
