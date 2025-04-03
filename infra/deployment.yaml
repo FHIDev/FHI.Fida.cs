@@ -24,11 +24,11 @@ spec:
       containers:
 #      - image: dhis2/core:2.41
 #      - image: tutum/hello-world
-      - image: chesscorp/chess-club
+      - image: csids/cs9-su-rstudio:latest
 #      - image: wbitt/network-multitool
         name: ct-cs9
         ports:
-        - containerPort: 80
+        - containerPort: 8080
           name: cs9-port
         resources:
 #          limits:
