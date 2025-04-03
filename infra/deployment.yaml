@@ -24,12 +24,19 @@ spec:
       containers:
 #      - image: dhis2/core:2.41
 #      - image: tutum/hello-world
-      - image: csids/cs9-su-rstudio:latest
+      - image: csids/cs9-su-rstudio:4.4.1
 #      - image: wbitt/network-multitool
         name: ct-cs9
         ports:
         - containerPort: 8787
           name: cs9-port
+        env:
+          - name: RSP_TESTUSER_UID
+            value: "1001"
+          - name: RSP_TESTUSER
+            value: rstudio
+          - name: RSP_TESTUSER_PASSWD
+            value: helloworld
         resources:
 #          limits:
 #            cpu: 4000m
