@@ -11,7 +11,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: cs9-test.fhi-k8s.com
+  - host: workbench-norsyss.fhi-k8s.com
     http:
       paths:
       - path: /
