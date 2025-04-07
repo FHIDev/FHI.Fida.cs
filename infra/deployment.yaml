@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
 #      - image: tutum/hello-world
-      - image: csids/cs9-su-rstudio:4.4.1
+      - image: ghcr.io/fhidev/fhi.fida.cs/skybert-workbench:latest
         name: ct-cs9
         ports:
         - containerPort: 8787
