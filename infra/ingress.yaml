@@ -23,5 +23,5 @@ spec:
               number: 80
   tls:
     - hosts:
-        - cs9-test.fhi-k8s.com
+        - workbench-norsyss.fhi-k8s.com
       secretName: tls-cs9-test
