@@ -36,6 +36,8 @@ spec:
           value: rstudio
         - name: RSP_TESTUSER_PASSWD
           value: helloworld
+        - name: ddd
+          value: helloworld
         resources:
 #          limits:
 #            cpu: 4000m
