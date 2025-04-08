@@ -24,6 +24,7 @@ spec:
       containers:
 #      - image: tutum/hello-world
       - image: ghcr.io/fhidev/fhi.fida.cs/skybert-workbench:latest
+        imagePullPolicy: Always
         name: ct-cs9
         ports:
         - containerPort: 8787
