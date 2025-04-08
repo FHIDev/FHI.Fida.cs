@@ -2,7 +2,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   creationTimestamp: null
-  name: rb-readonly
+  name: rb-readonly-1
   namespace: ns-cs9-test
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -19,7 +19,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   creationTimestamp: null
-  name: rb-readonly
+  name: rb-readonly-2
   namespace: ns-cs9-test
 roleRef:
   apiGroup: rbac.authorization.k8s.io
