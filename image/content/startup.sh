@@ -11,7 +11,7 @@ useradd -m -s /bin/bash -N -u 1001 rstudio
 echo "rstudio:helloworld" | sudo chpasswd
 
 # Live mount - Activate workbench licence file
-cp /secrets/posit-license /var/lib/rstudio-server/licence_file
+base64 -d /secrets/posit-license > /var/lib/rstudio-server/licence_file
 chmod 444 /var/lib/rstudio-server/licence_file
 rstudio-server license-manager deactivate
 rstudio-server license-manager activate-file /var/lib/rstudio-server/licence_file
