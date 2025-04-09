@@ -7,7 +7,7 @@ set -x
 # cp /shared/list_of_users.sh /usr/local/bin/list_of_users.sh
 # chmod +x /usr/local/bin/list_of_users.sh
 # /usr/local/bin/list_of_users.sh
-useradd -m -s /bin/bash -N -u 1001 RichardAubrey.White@fhi.no
+/usr/local/bin/create_user.sh richardaubreywhite@fhi.no 1001
 #echo "rstudio:helloworld" | sudo chpasswd
 
 # Live mount - openid
