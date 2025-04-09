@@ -36,7 +36,7 @@ spec:
           value: rstudio
         - name: RSP_TESTUSER_PASSWD
           value: helloworld
-        - name: ddddd
+        - name: dddddd
           value: helloworld
         resources:
 #          limits:
