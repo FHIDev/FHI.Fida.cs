@@ -7,8 +7,12 @@ set -x
 # cp /shared/list_of_users.sh /usr/local/bin/list_of_users.sh
 # chmod +x /usr/local/bin/list_of_users.sh
 # /usr/local/bin/list_of_users.sh
-useradd -m -s /bin/bash -N -u 1001 rstudio
-echo "rstudio:helloworld" | sudo chpasswd
+useradd -m -s /bin/bash -N -u 1001 RichardAubrey.White@fhi.no
+#echo "rstudio:helloworld" | sudo chpasswd
+
+# Live mount - openid
+cp /secrets/openid-client-secret /etc/rstudio/openid-client-secret
+chmod 0600 /etc/rstudio/openid-client-secret
 
 # Live mount - Activate workbench licence file
 base64 -d /secrets/posit-license > /var/lib/rstudio-server/licence_file
