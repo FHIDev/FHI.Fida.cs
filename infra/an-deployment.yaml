@@ -28,7 +28,7 @@ spec:
         name: ct-cs9an
         ports:
 #        - containerPort: 8787
-        - containerPort: 8080
+        - containerPort: 80
           name: cs9an-port
         env:
         - name: RSP_TESTUSER_UID
