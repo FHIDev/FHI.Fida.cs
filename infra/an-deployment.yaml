@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: app-cs9an-test
+#    fluentbit.fluent.io/enabled: "true"
+  name: deployment-cs9an-test
+  namespace: ns-cs9-test
+  annotations:
+    reloader.stakater.com/auto: "true"
+spec:
+  selector:
+    matchLabels:
+      app: app-cs9an-test
+  replicas: 1
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: app-cs9an-test
+#        fluentbit.fluent.io/enabled: "true"
+    spec:
+      containers:
+      - image: tutum/hello-world
+#      - image: ghcr.io/fhidev/fhi.fida.cs/skybert-workbench:latest
+        imagePullPolicy: Always
+        name: ct-cs9an
+        ports:
+#        - containerPort: 8787
+        - containerPort: 8080
+          name: cs9an-port
+        env:
+        - name: RSP_TESTUSER_UID
+          value: "1001"
+        - name: RSP_TESTUSER
+          value: rstudio
+        - name: RSP_TESTUSER_PASSWD
+          value: helloworld
+        - name: dddddddd
+          value: helloworld
+        resources:
+#          limits:
+#            cpu: 4000m
+#            memory: 8192Mi
+          requests:
+            cpu: 2000m
+            memory: 4096Mi
+        volumeMounts:
+        - mountPath: /secrets/
+          name: volume-akv-secret-1
+      volumes:
+      - csi:
+          driver: secrets-store.csi.k8s.io
+          nodePublishSecretRef:
+            name: secret-akv-sp           # Service principal secret
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: akv-cs9-test
+        name: volume-akv-secret-1

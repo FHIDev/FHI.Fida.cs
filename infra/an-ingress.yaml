@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-cs9an-test
+  namespace: ns-cs9-test
+  annotations:
+    #external-dns.alpha.kubernetes.io/target: 83.118.177.220
+    cert-manager.io/cluster-issuer: fhi-k8s-letsencrypt-azuredns-issuer
+    nginx.ingress.kubernetes.io/service-upstream: "true"  # To force clusterip instead of endpoint, disables sticky connection
+    nginx.ingress.kubernetes.io/proxy-body-size: "512m"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: airflow-norsyss.fhi-k8s.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: service-cs9an-test
+            port:
+              number: 80
+  tls:
+    - hosts:
+        - airflow-norsyss.fhi-k8s.com
+      secretName: tls-cs9an-test
