@@ -27,9 +27,10 @@ spec:
         imagePullPolicy: Always
         name: ct-cs9an
         ports:
-#        - containerPort: 8787
         - containerPort: 80
           name: cs9an-port
+        command: ["printenv"]
+        args: ["HOSTNAME", "KUBERNETES_PORT"]
         env:
         - name: RSP_TESTUSER_UID
           value: "1001"
