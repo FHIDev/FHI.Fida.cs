@@ -22,8 +22,7 @@ spec:
 #        fluentbit.fluent.io/enabled: "true"
     spec:
       containers:
-      - image: tutum/hello-world
-#      - image: ghcr.io/fhidev/fhi.fida.cs/skybert-workbench:latest
+      - image: apache/airflow:2.10.5
         imagePullPolicy: Always
         name: ct-cs9an
         ports:
