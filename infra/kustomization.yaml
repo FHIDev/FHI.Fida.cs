@@ -6,9 +6,7 @@ resources:
   - wn-deployment.yaml
   - wn-service.yaml
   - wn-ingress.yaml
-  - an-deployment.yaml
-  - an-service.yaml
-  - an-ingress.yaml
+  - airflow.yaml
 namespace: ns-cs9-test
 #commonLabels:
 #  app: app-cs9-test
