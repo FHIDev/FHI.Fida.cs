@@ -1,3 +1,50 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: airflow-helm-repo
+  namespace: cs9-airflow-repo
+spec:
+  interval: 1m
+  url: https://airflow.apache.org
+---
+apiVersion: helm.toolkit.fluxcd.io/v1beta2
+kind: HelmRelease
+metadata:
+  name: airflow
+  namespace: cs9-airflow
+spec:
+  releaseName: airflow
+  interval: 5m
+  chart:
+    spec:
+      chart: apache-airflow
+      version: 2.10.0
+      sourceRef:
+        kind: HelmRepository
+        name: airflow-helm-repo
+        namespace: cs9-airflow-repo
+  values:
+    service:
+      type: ClusterIP
+    dags:
+      persistence:
+        enabled: true
+        size: 1Gi
+    workers:
+      replicas: 1
+    executor: "KubernetesExecutor"
+    redis:
+      enabled: true
+    postgresql:
+      enabled: true
+
+
+
+
+
+
+
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
