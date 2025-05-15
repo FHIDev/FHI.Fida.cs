@@ -17,7 +17,7 @@ spec:
   interval: 5m
   chart:
     spec:
-      chart: apache-airflow
+      chart: airflow
       version: 2.10.5
       sourceRef:
         kind: HelmRepository
