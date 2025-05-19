@@ -38,7 +38,7 @@ spec:
         enabled: true
         size: 1Gi
     workers:
-      replicas: 1
+      replicas: 2
     executor: "KubernetesExecutor"
     redis:
       enabled: true
