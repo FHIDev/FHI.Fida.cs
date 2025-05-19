@@ -44,10 +44,3 @@ spec:
       enabled: true
     postgresql:
       enabled: true
-    scheduler:
-      livenessProbe:
-        initialDelaySeconds: 30
-        timeoutSeconds: 5
-      readinessProbe:
-        initialDelaySeconds: 30
-        timeoutSeconds: 5
