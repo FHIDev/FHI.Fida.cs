@@ -15,7 +15,7 @@ metadata:
 spec:
   releaseName: airflow
   interval: 5m
-  timeout: 10m  
+  timeout: 11m  
   chart:
     spec:
       chart: airflow
