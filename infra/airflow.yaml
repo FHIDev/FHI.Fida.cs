@@ -24,23 +24,3 @@ spec:
         kind: HelmRepository
         name: airflow-helm-repo1
         namespace: ns-cs9-test
-  values:
-    createUserJob:
-      useHelmHooks: false
-      applyCustomEnv: false
-    migrateDatabaseJob:
-      useHelmHooks: false
-      applyCustomEnv: false
-    service:
-      type: ClusterIP
-    dags:
-      persistence:
-        enabled: true
-        size: 1Gi
-    workers:
-      replicas: 2
-    executor: "KubernetesExecutor"
-    redis:
-      enabled: true
-    postgresql:
-      enabled: true
