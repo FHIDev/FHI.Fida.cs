@@ -25,6 +25,12 @@ spec:
         name: airflow-helm-repo
         namespace: ns-cs9-test
   values:
+    createUserJob:
+      useHelmHooks: false
+      applyCustomEnv: false
+    migrateDatabaseJob:
+      useHelmHooks: false
+      applyCustomEnv: false
     service:
       type: ClusterIP
     dags:
@@ -38,3 +44,10 @@ spec:
       enabled: true
     postgresql:
       enabled: true
+    scheduler:
+      livenessProbe:
+        initialDelaySeconds: 30
+        timeoutSeconds: 5
+      readinessProbe:
+        initialDelaySeconds: 30
+        timeoutSeconds: 5
