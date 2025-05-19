@@ -24,3 +24,10 @@ spec:
         kind: HelmRepository
         name: airflow-helm-repo1
         namespace: ns-cs9-test
+  values:
+    createUserJob:
+      useHelmHooks: false
+      applyCustomEnv: false
+    migrateDatabaseJob:
+      useHelmHooks: false
+      applyCustomEnv: false
