@@ -40,4 +40,4 @@ spec:
       useHelmHooks: false
       applyCustomEnv: false
     postgresql:
-      enabled: false
+      enabled: true
