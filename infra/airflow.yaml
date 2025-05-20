@@ -27,13 +27,13 @@ spec:
   values:
     data:
       metadataConnection:
-      user: altformyerettigheter
-      pass: portal.azure.comcreateMicrosoft.PostgreSQLServer
-      protocol: postgresql
-      host: airflow-cs9-test.postgres.database.azure.com
-      port: 5432
-      db: postgres
-      sslmode: disable
+        user: altformyerettigheter
+        pass: portal.azure.comcreateMicrosoft.PostgreSQLServer
+        protocol: postgresql
+        host: airflow-cs9-test.postgres.database.azure.com
+        port: 5432
+        db: postgres
+        sslmode: disable
   
     defaultUser:
       enabled: true
