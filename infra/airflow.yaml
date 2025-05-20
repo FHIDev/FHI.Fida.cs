@@ -25,6 +25,12 @@ spec:
         name: airflow-helm-repo1
         namespace: ns-cs9-test
   values:
+    airflow:
+    users:
+      - username: admin
+        password: admin
+        role: Admin
+        email: admin@example.com
     createUserJob:
       useHelmHooks: false
       applyCustomEnv: false
