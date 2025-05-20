@@ -28,7 +28,7 @@ spec:
     defaultUser:
       enabled: true
       role: Admin
-      username: admin2
+      username: admin3
       email: admin@example2.com
       firstName: admin2
       lastName: user2
