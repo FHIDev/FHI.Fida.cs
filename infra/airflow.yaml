@@ -42,3 +42,5 @@ spec:
       applyCustomEnv: false
     postgresql:
       enabled: false
+    redis:
+      enabled: true
