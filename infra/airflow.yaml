@@ -14,7 +14,7 @@ metadata:
   namespace: ns-cs9-test
 spec:
   releaseName: airflow
-  interval: 6m
+  interval: 5m
   timeout: 5m  
   chart:
     spec:
