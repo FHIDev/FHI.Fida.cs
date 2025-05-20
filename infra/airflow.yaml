@@ -33,7 +33,7 @@ spec:
         host: airflow-cs9-test.postgres.database.azure.com
         port: 5432
         db: postgres
-        sslmode: enable
+        sslmode: require
     createUserJob:
       useHelmHooks: false
       applyCustomEnv: false
