@@ -34,15 +34,6 @@ spec:
         port: 5432
         db: postgres
         sslmode: disable
-  
-    defaultUser:
-      enabled: true
-      role: Admin
-      username: admin3
-      email: admin@example2.com
-      firstName: admin2
-      lastName: user2
-      password: admin2
     createUserJob:
       useHelmHooks: false
       applyCustomEnv: false
