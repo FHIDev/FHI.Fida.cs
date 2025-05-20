@@ -28,7 +28,7 @@ spec:
     data:
       metadataConnection:
         user: altformyerettigheter
-        pass: portal.azure.comcreateMicrosoft.PostgreSQLServer
+        pass: portalazurecomcreateMicrosoftPostgreSQLServer
         protocol: postgresql
         host: airflow-cs9-test.postgres.database.azure.com
         port: 5432
