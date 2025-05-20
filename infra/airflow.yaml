@@ -27,8 +27,8 @@ spec:
   values:
     airflow:
     users:
-      - username: admin
-        password: admin
+      - username: admin2
+        password: admin2
         role: Admin
         email: admin@example2.com
     createUserJob:
