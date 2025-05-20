@@ -14,7 +14,7 @@ metadata:
   namespace: ns-cs9-test
 spec:
   releaseName: airflow
-  interval: 6m
+  interval: 5m
   timeout: 5m  
   chart:
     spec:
@@ -34,12 +34,6 @@ spec:
         port: 5432
         db: postgres
         sslmode: require
-    createUserJob:
-      useHelmHooks: false
-      applyCustomEnv: false
-    migrateDatabaseJob:
-      useHelmHooks: false
-      applyCustomEnv: false
     postgresql:
       enabled: false
     redis:
