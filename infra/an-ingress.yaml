@@ -18,9 +18,9 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: service-cs9an-test
+            name: airflow-webserver
             port:
-              number: 80
+              number: 8080
   tls:
     - hosts:
         - airflow-norsyss.fhi-k8s.com
