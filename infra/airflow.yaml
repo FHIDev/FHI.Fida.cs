@@ -65,14 +65,14 @@ spec:
     # worker:
     #   waitForMigrations:
     #     enabled: false
-    # createUserJob:
-    #   enabled: true
-    #   useHelmHooks: false
-    #   applyCustomEnv: false
-    # migrateDatabaseJob:
-    #   enabled: true
-    #   useHelmHooks: false
-    #   applyCustomEnv: false
+    createUserJob:
+      enabled: true
+      useHelmHooks: false
+      applyCustomEnv: false
+    migrateDatabaseJob:
+      enabled: true
+      useHelmHooks: false
+      applyCustomEnv: false
     # startupProbe:
     #   httpGet:
     #     path: /health
