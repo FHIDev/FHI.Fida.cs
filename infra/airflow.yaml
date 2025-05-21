@@ -27,11 +27,11 @@ spec:
         name: airflow-helm-repo1
         namespace: ns-cs9-test
   values:
-    airflowVersion: "3.0.0"
+    airflowVersion: "3.0.1"
     images:
       airflow:
         repository: apache/airflow
-        tag: 3.0.0
+        tag: 3.0.1
         pullPolicy: IfNotPresent
 #    data:
 #      metadataConnection:
@@ -57,15 +57,15 @@ spec:
     #     syncWait: 60
     #     depth: 1
     #     wait: true
-    scheduler:
-      waitForMigrations:
-        enabled: false
-    triggerer:
-      waitForMigrations:
-        enabled: false
-    worker:
-      waitForMigrations:
-        enabled: false
+    # scheduler:
+    #   waitForMigrations:
+    #     enabled: false
+    # triggerer:
+    #   waitForMigrations:
+    #     enabled: false
+    # worker:
+    #   waitForMigrations:
+    #     enabled: false
     createUserJob:
       enabled: true
       useHelmHooks: false
@@ -74,12 +74,12 @@ spec:
       enabled: true
       useHelmHooks: false
       applyCustomEnv: false
-    startupProbe:
-      httpGet:
-        path: /health
-        port: 8080
-        scheme: HTTP
-      timeoutSeconds: 60
-      periodSeconds: 10
-      successThreshold: 1
-      failureThreshold: 20
+    # startupProbe:
+    #   httpGet:
+    #     path: /health
+    #     port: 8080
+    #     scheme: HTTP
+    #   timeoutSeconds: 60
+    #   periodSeconds: 10
+    #   successThreshold: 1
+    #   failureThreshold: 20
