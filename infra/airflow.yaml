@@ -34,10 +34,16 @@ spec:
 #        port: 5432
 #        db: postgres
 #        sslmode: require
-    postgresql:
-      enabled: true
-    redis:
-      enabled: true
+#    postgresql:
+#      enabled: true
+#    redis:
+#      enabled: true
+    createUserJob:
+      useHelmHooks: false
+      applyCustomEnv: false
+    migrateDatabaseJob:
+      useHelmHooks: false
+      applyCustomEnv: false
     startupProbe:
       httpGet:
         path: /health
