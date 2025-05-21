@@ -43,7 +43,43 @@ spec:
 #        db: postgres
 #        sslmode: require
     postgresql:
-      enabled: false
+      enabled: true
     redis:
-      enabled: false
-
+      enabled: true
+    dags:
+      persistence:
+        enabled: false  # Disable DAG volume mount that would override gitSync
+      gitSync:
+        enabled: true
+        repo: https://github.com/FHIDev/FHI.Fida.cs.git
+        branch: skybert-airflow-dags
+        subPath: ""  # if your DAG files are inside a 'dags/' folder in the repo root
+        syncWait: 60
+        depth: 1
+        wait: true
+    scheduler:
+      waitForMigrations:
+        enabled: false
+    triggerer:
+      waitForMigrations:
+        enabled: false
+    worker:
+      waitForMigrations:
+        enabled: false
+    createUserJob:
+      enabled: true
+      useHelmHooks: false
+      applyCustomEnv: false
+    migrateDatabaseJob:
+      enabled: true
+      useHelmHooks: false
+      applyCustomEnv: false
+    startupProbe:
+      httpGet:
+        path: /health
+        port: 8080
+        scheme: HTTP
+      timeoutSeconds: 60
+      periodSeconds: 10
+      successThreshold: 1
+      failureThreshold: 20
