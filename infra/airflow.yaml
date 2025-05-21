@@ -13,7 +13,7 @@ metadata:
   name: airflow
   namespace: ns-cs9-test
   annotations:
-    force-redeploy: "Y"  # or any unique value (e.g. timestamp)
+    force-redeploy: "z"  # or any unique value (e.g. timestamp)
 spec:
   releaseName: airflow
   interval: 5m
