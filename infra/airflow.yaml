@@ -25,17 +25,17 @@ spec:
         name: airflow-helm-repo1
         namespace: ns-cs9-test
   values:
-    data:
-      metadataConnection:
-        user: altformyerettigheter
-        pass: portalazurecomcreateMicrosoftPostgreSQLServer
-        protocol: postgresql
-        host: airflow-cs9-test.postgres.database.azure.com
-        port: 5432
-        db: postgres
-        sslmode: require
+#    data:
+#      metadataConnection:
+#        user: altformyerettigheter
+#        pass: portalazurecomcreateMicrosoftPostgreSQLServer
+#        protocol: postgresql
+#        host: airflow-cs9-test.postgres.database.azure.com
+#        port: 5432
+#        db: postgres
+#        sslmode: require
     postgresql:
-      enabled: false
+      enabled: true
     redis:
       enabled: true
     createUserJob:
