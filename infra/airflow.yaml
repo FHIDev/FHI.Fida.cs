@@ -55,7 +55,7 @@ spec:
       useHelmHooks: false
       applyCustomEnv: false
     migrateDatabaseJob:
-      enabled: true
+      enabled: false
       useHelmHooks: false
       applyCustomEnv: false
     startupProbe:
