@@ -30,7 +30,7 @@ spec:
     images:
       airflow:
         repository: apache/airflow
-        tag: 3.0.1
+        tag: 3.0.0
         pullPolicy: IfNotPresent
 #    data:
 #      metadataConnection:
