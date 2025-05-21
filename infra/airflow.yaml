@@ -32,11 +32,11 @@ spec:
         repository: ghcr.io/fhidev/fhi.fida.cs/skybert-airflow
         tag: latest
         pullPolicy: Always
-#    airflow:
-#      extraInitContainers:
-#        - name: check-dag-dir
-#          image: ghcr.io/fhidev/fhi.fida.cs/skybert-airflow
-#          command: ["sh", "-c", "echo 'Contents of /opt/airflow/dags:' && ls -la /opt/airflow/dags"]
+    scheduler:
+      extraInitContainers:
+        - name: hello
+          image: ghcr.io/fhidev/fhi.fida.cs/skybert-airflow:latest
+          command: ["sh", "-c", "echo 'Contents of /opt/airflow/dags:' && ls -la /opt/airflow/dags"]
         
 #    data:
 #      metadataConnection:
