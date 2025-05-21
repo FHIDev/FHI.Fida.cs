@@ -27,17 +27,6 @@ spec:
         name: airflow-helm-repo1
         namespace: ns-cs9-test
   values:
-    images:
-      airflow:
-        repository: ghcr.io/fhidev/fhi.fida.cs/skybert-airflow
-        tag: latest
-        pullPolicy: Always
-    scheduler:
-      extraInitContainers:
-        - name: hello
-          image: ghcr.io/fhidev/fhi.fida.cs/skybert-airflow:latest
-          command: ["sh", "-c", "echo 'Contents of /opt/airflow/dags:' && ls -la /opt/airflow/dags"]
-        
 #    data:
 #      metadataConnection:
 #        user: altformyerettigheter
@@ -53,7 +42,15 @@ spec:
       enabled: true
     dags:
       persistence:
-        enabled: false
+        enabled: false  # Disable DAG volume mount that would override gitSync
+      gitSync:
+        enabled: true
+        repo: https://github.com/FHIDev/FHI.Fida.cs.git
+        branch: skybert-airflow-dags
+        subPath: ""  # if your DAG files are inside a 'dags/' folder in the repo root
+        syncWait: 60
+        depth: 1
+        wait: true
     createUserJob:
       useHelmHooks: false
       applyCustomEnv: false
