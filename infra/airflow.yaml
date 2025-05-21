@@ -30,6 +30,13 @@ spec:
         repository: ghcr.io/fhidev/fhi.fida.cs/skybert-airflow
         tag: latest
         pullPolicy: Always
+      extraInitContainers:
+        - name: check-dag-dir
+          image: busybox
+          command: ["sh", "-c", "echo 'Contents of /opt/airflow/dags:' && ls -la /opt/airflow/dags"]
+          volumeMounts:
+            - name: dags
+              mountPath: /opt/airflow/dags
 #    data:
 #      metadataConnection:
 #        user: altformyerettigheter
