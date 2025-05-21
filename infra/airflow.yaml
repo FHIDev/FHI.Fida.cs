@@ -34,9 +34,7 @@ spec:
         - name: check-dag-dir
           image: busybox
           command: ["sh", "-c", "echo 'Contents of /opt/airflow/dags:' && ls -la /opt/airflow/dags"]
-          volumeMounts:
-            - name: dags
-              mountPath: /opt/airflow/dags
+
 #    data:
 #      metadataConnection:
 #        user: altformyerettigheter
