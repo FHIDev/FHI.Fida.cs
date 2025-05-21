@@ -28,6 +28,11 @@ spec:
         namespace: ns-cs9-test
   values:
     airflowVersion: "3.0.0"
+    images:
+      airflow:
+        repository: apache/airflow
+        tag: 3.0.0
+        pullPolicy: IfNotPresent
 #    data:
 #      metadataConnection:
 #        user: altformyerettigheter
