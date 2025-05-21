@@ -3,6 +3,8 @@ kind: HelmRepository
 metadata:
   name: airflow-helm-repo1
   namespace: ns-cs9-test
+  annotations:
+    force-redeploy: "X"  # or any unique value (e.g. timestamp)
 spec:
   interval: 1m
   url: https://airflow.apache.org
