@@ -34,7 +34,27 @@ spec:
         - name: check-dag-dir
           image: ghcr.io/fhidev/fhi.fida.cs/skybert-airflow
           command: ["sh", "-c", "echo 'Contents of /opt/airflow/dags:' && ls -la /opt/airflow/dags"]
-
+    scheduler:
+      image:
+        repository: ghcr.io/fhidev/fhi.fida.cs/skybert-airflow
+        tag: latest
+        pullPolicy: Always
+    web:
+      image:
+        repository: ghcr.io/fhidev/fhi.fida.cs/skybert-airflow
+        tag: latest
+        pullPolicy: Always
+    workers:
+      image:
+        repository: ghcr.io/fhidev/fhi.fida.cs/skybert-airflow
+        tag: latest
+        pullPolicy: Always
+    triggerer:
+      image:
+        repository: ghcr.io/fhidev/fhi.fida.cs/skybert-airflow
+        tag: latest
+        pullPolicy: Always
+        
 #    data:
 #      metadataConnection:
 #        user: altformyerettigheter
