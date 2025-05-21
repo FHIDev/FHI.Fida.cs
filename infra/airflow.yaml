@@ -51,13 +51,14 @@ spec:
         syncWait: 60
         depth: 1
         wait: true
-    # createUserJob:
-    #   useHelmHooks: false
-    #   applyCustomEnv: false
-    # migrateDatabaseJob:
-    #   enabled: false
-    #   useHelmHooks: false
-    #   applyCustomEnv: false
+    createUserJob:
+      enabled: true
+      useHelmHooks: false
+      applyCustomEnv: false
+    migrateDatabaseJob:
+      enabled: true
+      useHelmHooks: false
+      applyCustomEnv: false
     startupProbe:
       httpGet:
         path: /health
