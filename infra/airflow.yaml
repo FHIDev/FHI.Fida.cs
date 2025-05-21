@@ -41,8 +41,8 @@ spec:
 #        port: 5432
 #        db: postgres
 #        sslmode: require
-    # postgresql:
-    #   enabled: true
+    postgresql:
+      enabled: false
     # redis:
     #   enabled: true
     dags:
