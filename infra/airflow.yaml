@@ -48,6 +48,9 @@ spec:
       enabled: true
     redis:
       enabled: true
+    dags:
+      persistence:
+        enabled: false
     createUserJob:
       useHelmHooks: false
       applyCustomEnv: false
