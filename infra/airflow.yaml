@@ -56,6 +56,12 @@ spec:
     #     syncWait: 60
     #     depth: 1
     #     wait: true
+    triggerer:
+      waitForMigrations:
+        enabled: false
+    worker:
+      waitForMigrations:
+        enabled: false
     createUserJob:
       enabled: true
       useHelmHooks: false
