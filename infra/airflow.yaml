@@ -27,6 +27,11 @@ spec:
         name: airflow-helm-repo1
         namespace: ns-cs9-test
   values:
+    images:
+      airflow:
+        repository: apache/airflow
+        tag: 3.0.1
+        pullPolicy: IfNotPresent
 #    data:
 #      metadataConnection:
 #        user: altformyerettigheter
