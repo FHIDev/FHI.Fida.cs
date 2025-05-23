@@ -32,6 +32,15 @@ spec:
       useHelmHooks: false
       applyCustomEnv: false
     postgresql:
-      enabled: true
+      enabled: false
     redis:
       enabled: true
+    data:
+      metadataConnection:
+        user: altformyerettigheter
+        pass: portalazurecomcreateMicrosoftPostgreSQLServer
+        protocol: postgresql
+        host: airflow-cs9-test.postgres.database.azure.com
+        port: 5432
+        db: postgres
+        sslmode: require
