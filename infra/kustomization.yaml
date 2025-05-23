@@ -8,7 +8,7 @@ resources:
   - wn-ingress.yaml
   - airflow.yaml
 #  - an-ingress.yaml
-nameSuffix: -Test2
+nameSuffix: test
 namespace: ns-cs9-test
 #commonLabels:
 #  app: app-cs9-test
