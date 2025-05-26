@@ -25,6 +25,18 @@ spec:
         name: airflow-helm-repo1
         namespace: ns-cs9-test
   values:
+    dags:
+      persistence:
+        enabled: false  # Disable DAG volume mount that would override gitSync
+      gitSync:
+        enabled: true
+        repo: https://github.com/FHIDev/FHI.Fida.cs.git
+        branch: skybert-airflow-dags
+        subPath: ""  # if your DAG files are inside a 'dags/' folder in the repo root
+        syncWait: 60
+        depth: 1
+        wait: true
+
     createUserJob:
       useHelmHooks: false
       applyCustomEnv: false
@@ -32,15 +44,15 @@ spec:
       useHelmHooks: false
       applyCustomEnv: false
     postgresql:
-      enabled: false
+      enabled: true
     redis:
       enabled: true
-    data:
-      metadataConnection:
-        user: altformyerettigheter
-        pass: portalazurecomcreateMicrosoftPostgreSQLServer
-        protocol: postgresql
-        host: airflow-cs9-test.postgres.database.azure.com
-        port: 5432
-        db: postgres
-        sslmode: prefer
+    # data:
+    #   metadataConnection:
+    #     user: altformyerettigheter
+    #     pass: portalazurecomcreateMicrosoftPostgreSQLServer
+    #     protocol: postgresql
+    #     host: airflow-cs9-test.postgres.database.azure.com
+    #     port: 5432
+    #     db: postgres
+    #     sslmode: prefer
