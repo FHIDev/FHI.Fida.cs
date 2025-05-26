@@ -34,7 +34,6 @@ spec:
         branch: skybert-airflow-dags
         subPath: ""  # if your DAG files are inside a 'dags/' folder in the repo root
         depth: 1
-        wait: true
 
     createUserJob:
       useHelmHooks: false
