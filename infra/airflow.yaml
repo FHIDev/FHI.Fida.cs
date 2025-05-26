@@ -33,7 +33,6 @@ spec:
         repo: https://github.com/FHIDev/FHI.Fida.cs.git
         branch: skybert-airflow-dags
         subPath: ""  # if your DAG files are inside a 'dags/' folder in the repo root
-        syncWait: 60
         depth: 1
         wait: true
 
