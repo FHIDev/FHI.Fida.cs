@@ -6,7 +6,7 @@ resources:
   - wn-deployment.yaml
   - wn-service.yaml
   - wn-ingress.yaml
-  - airflow.yaml
+  - airflow1.yaml
   - an-ingress.yaml
 # nameSuffix: test
 namespace: ns-cs9-test
