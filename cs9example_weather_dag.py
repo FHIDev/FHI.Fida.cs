@@ -17,7 +17,6 @@ with DAG(
         cmds=["/usr/local/bin/install_ss_and_run_task_v2.sh"],
         arguments=[
             "https://github.com/csids/cs9example.git",
-            "cs9example", 
             "main",
             "weather_download_and_import_rawdata",
             "CS9_DBCONFIG_USER=yourusername",
