@@ -3,7 +3,7 @@ from airflow import DAG
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 
 with DAG(
-    dag_id="hello_world_docker",
+    dag_id="hello_world_k8s",
     start_date=datetime(2024, 1, 1),
     schedule_interval=None,
     catchup=False,
