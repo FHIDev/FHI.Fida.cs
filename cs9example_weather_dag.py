@@ -5,7 +5,7 @@ from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperato
 with DAG(
     dag_id="cs9example_weather_download",
     start_date=datetime(2024, 1, 1),
-    schedule_interval=None,
+    schedule_interval="@hourly",
     catchup=False,
     tags=["cs9", "weather", "example"],
 ) as dag:
