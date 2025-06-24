@@ -55,7 +55,11 @@ fi
 # Set environment variables
 ENV_COMMAND=""
 for var in "${@:$ENV_START}"; do
-  ENV_COMMAND="${ENV_COMMAND}Sys.setenv(${var%%=*}='${var#*=}'); "
+  key="${var%%=*}"
+  value="${var#*=}"
+  # Escape double quotes in the value for R
+  escaped_value="${value//\"/\\\"}"
+  ENV_COMMAND="${ENV_COMMAND}Sys.setenv(${key}=\"${escaped_value}\"); "
 done
 
 # Run the specified R command with environment variables
