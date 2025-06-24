@@ -16,7 +16,7 @@ with DAG(
         cmds=["echo"],
         arguments=["hello world"],
         name="hello-world-pod",
-        namespace="default",
+        namespace="ns-cs9-test",
         is_delete_operator_pod=True,
     )
     
