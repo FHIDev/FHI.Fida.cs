@@ -21,17 +21,22 @@ spec:
         ports:
         - containerPort: 5432
         env:
-        - name: POSTGRES_DB
-          value: workbench_db
         - name: POSTGRES_USER
-          value: workbench_user
+          value: yourusername
         - name: POSTGRES_PASSWORD
-          value: workbench_pass
+          value: yourStrongPassword100
+        - name: POSTGRES_DB
+          value: postgres
         - name: PGDATA
           value: /var/lib/postgresql/data/pgdata
         volumeMounts:
         - name: postgres-storage
           mountPath: /var/lib/postgresql/data
+        - name: postgres-init
+          mountPath: /docker-entrypoint-initdb.d
       volumes:
       - name: postgres-storage
         emptyDir: {}
+      - name: postgres-init
+        configMap:
+          name: postgres-init-script

@@ -8,6 +8,7 @@ resources:
   - wn-ingress.yaml
   - postgres-deployment.yaml
   - postgres-service.yaml
+  - postgres-init-configmap.yaml
   - airflow1.yaml
   - an-ingress.yaml
 namespace: ns-cs9-test

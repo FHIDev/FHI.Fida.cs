@@ -38,16 +38,34 @@ spec:
           value: helloworld
         - name: dddddddd
           value: helloworld
-        - name: POSTGRES_HOST
-          value: postgres-service
-        - name: POSTGRES_PORT
+        - name: CS9_DBCONFIG_USER
+          value: yourusername
+        - name: CS9_DBCONFIG_PASSWORD
+          value: yourStrongPassword100
+        - name: CS9_AUTO
+          value: "0"
+        - name: CS9_PATH
+          value: /cs9path
+        - name: CS9_DBCONFIG_ACCESS
+          value: config/anon
+        - name: CS9_DBCONFIG_DRIVER
+          value: PostgreSQL Unicode
+        - name: CS9_DBCONFIG_PORT
           value: "5432"
-        - name: POSTGRES_DB
-          value: workbench_db
-        - name: POSTGRES_USER
-          value: workbench_user
-        - name: POSTGRES_PASSWORD
-          value: workbench_pass
+        - name: CS9_DBCONFIG_SSLMODE
+          value: "no"
+        - name: CS9_DBCONFIG_ROLE_CREATE_TABLE
+          value: yourusername
+        - name: CS9_DBCONFIG_SERVER
+          value: postgres-service
+        - name: CS9_DBCONFIG_SCHEMA_CONFIG
+          value: public
+        - name: CS9_DBCONFIG_DB_CONFIG
+          value: cs_interactive_config
+        - name: CS9_DBCONFIG_SCHEMA_ANON
+          value: public
+        - name: CS9_DBCONFIG_DB_ANON
+          value: cs_interactive_anon
         resources:
 #          limits:
 #            cpu: 4000m

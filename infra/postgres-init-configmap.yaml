@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-script
+  namespace: ns-cs9-test
+data:
+  init.sql: |
+    -- Create the required databases for cs9
+    CREATE DATABASE IF NOT EXISTS postgres;
+    CREATE DATABASE cs_interactive_config;
+    CREATE DATABASE cs_interactive_anon;
+    
+    -- Grant permissions to the user
+    GRANT ALL PRIVILEGES ON DATABASE postgres TO yourusername;
+    GRANT ALL PRIVILEGES ON DATABASE cs_interactive_config TO yourusername;
+    GRANT ALL PRIVILEGES ON DATABASE cs_interactive_anon TO yourusername;
