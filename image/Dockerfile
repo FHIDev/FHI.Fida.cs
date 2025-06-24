@@ -7,9 +7,9 @@ RUN bash /tmp/env_inside_image.sh
 
 # Copy config and startup
 COPY content/install_ss_and_run_task.sh /usr/local/bin/install_ss_and_run_task.sh
-COPY content/install_ss_and_run_task_v2.sh /usr/local/bin/install_ss_and_run_task_v2.sh
+COPY content/install_ss_and_run_task_k8s.sh /usr/local/bin/install_ss_and_run_task_k8s.sh
 RUN chmod +x /usr/local/bin/install_ss_and_run_task.sh
-RUN chmod +x /usr/local/bin/install_ss_and_run_task_v2.sh
+RUN chmod +x /usr/local/bin/install_ss_and_run_task_k8s.sh
 
 ### install extra packages
 RUN R -e 'devtools::install_github("norsyss/norsyss", upgrade="never")'
