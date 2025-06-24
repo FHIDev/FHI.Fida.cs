@@ -57,7 +57,7 @@ spec:
         - name: CS9_DBCONFIG_ROLE_CREATE_TABLE
           value: yourusername
         - name: CS9_DBCONFIG_SERVER
-          value: postgres-service
+          value: db
         - name: CS9_DBCONFIG_SCHEMA_CONFIG
           value: public
         - name: CS9_DBCONFIG_DB_CONFIG
