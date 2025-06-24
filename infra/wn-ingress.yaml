@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: ingress-cs9
+  name: ingress-cs9-test
   namespace: ns-cs9-test
   annotations:
     #external-dns.alpha.kubernetes.io/target: 83.118.177.220
