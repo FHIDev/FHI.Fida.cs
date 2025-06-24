@@ -16,6 +16,6 @@ with DAG(
         command='echo "hello world"',
         docker_url="unix://var/run/docker.sock",
         network_mode="bridge",
-        auto_remove=True,
+        auto_remove="success",
     )
     
