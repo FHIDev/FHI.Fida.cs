@@ -1,28 +1,6 @@
 from datetime import datetime
 from airflow import DAG
-from airflow.providers.postgres.operators.postgres import PostgresOperator
-from airflow.providers.postgres.hooks.postgres import PostgresHook
-from airflow.operators.python import PythonOperator
-
-def list_tables():
-    """List all table names in the PostgreSQL database"""
-    hook = PostgresHook(postgres_conn_id='postgres_default')
-    
-    # Query to get all table names from information_schema
-    sql = """
-    SELECT table_name 
-    FROM information_schema.tables 
-    WHERE table_schema = 'public' 
-    ORDER BY table_name;
-    """
-    
-    records = hook.get_records(sql)
-    
-    print("Tables in the database:")
-    for record in records:
-        print(f"- {record[0]}")
-    
-    return [record[0] for record in records]
+from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 
 with DAG(
     dag_id="postgres_tables_list",
@@ -32,7 +10,16 @@ with DAG(
     tags=["postgres", "database"],
 ) as dag:
 
-    list_tables_task = PythonOperator(
+    list_tables_task = KubernetesPodOperator(
         task_id="list_all_tables",
-        python_callable=list_tables,
+        image="postgres:15",
+        cmds=["psql"],
+        arguments=[
+            "postgresql://altformyerettigheter:portalazurecomcreateMicrosoftPostgreSQLServer@airflow-cs9-test.postgres.database.azure.com:5432/postgres?sslmode=prefer",
+            "-c",
+            "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name;"
+        ],
+        name="postgres-tables-pod",
+        namespace="ns-cs9-test",
+        is_delete_operator_pod=True,
     )
