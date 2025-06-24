@@ -20,7 +20,7 @@ with DAG(
             "main",
             "weather_download_and_import_rawdata"
         ],
-        env={
+        env_vars={
             "CS9_DBCONFIG_USER": "yourusername",
             "CS9_DBCONFIG_PASSWORD": "yourStrongPassword100",
             "CS9_AUTO": "0",
