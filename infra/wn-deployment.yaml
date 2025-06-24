@@ -61,11 +61,11 @@ spec:
         - name: CS9_DBCONFIG_SCHEMA_CONFIG
           value: public
         - name: CS9_DBCONFIG_DB_CONFIG
-          value: cs_interactive_config
+          value: postgres
         - name: CS9_DBCONFIG_SCHEMA_ANON
           value: public
         - name: CS9_DBCONFIG_DB_ANON
-          value: cs_interactive_anon
+          value: postgres
         resources:
 #          limits:
 #            cpu: 4000m
