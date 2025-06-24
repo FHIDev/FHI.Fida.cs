@@ -4,7 +4,7 @@ metadata:
   labels:
     app: app-cs9-test
 #    fluentbit.fluent.io/enabled: "true"
-  name: deployment-cs9-test
+  name: workbench
   namespace: ns-cs9-test
   annotations:
     reloader.stakater.com/auto: "true"
