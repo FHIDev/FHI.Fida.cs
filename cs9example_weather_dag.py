@@ -13,6 +13,7 @@ with DAG(
     weather_download_task = KubernetesPodOperator(
         task_id="weather_download_and_import",
         image="ghcr.io/fhidev/fhi.fida.cs/cs9base:latest",
+        image_pull_policy="Always",
         cmds=["/usr/local/bin/install_ss_and_run_task.sh"],
         arguments=[
             "csids",
