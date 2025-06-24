@@ -15,7 +15,7 @@ with DAG(
         image="postgres:15",
         cmds=["psql"],
         arguments=[
-            "postgresql://altformyerettigheter:portalazurecomcreateMicrosoftPostgreSQLServer@airflow-cs9-test.postgres.database.azure.com:5432/postgres?sslmode=prefer",
+            "postgresql://workbench_user:workbench_pass@postgres-service.ns-cs9-test.svc.cluster.local:5432/workbench_db",
             "-c",
             "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name;"
         ],
