@@ -38,6 +38,16 @@ spec:
           value: helloworld
         - name: dddddddd
           value: helloworld
+        - name: POSTGRES_HOST
+          value: postgres-service
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_DB
+          value: workbench_db
+        - name: POSTGRES_USER
+          value: workbench_user
+        - name: POSTGRES_PASSWORD
+          value: workbench_pass
         resources:
 #          limits:
 #            cpu: 4000m
