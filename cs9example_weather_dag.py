@@ -4,9 +4,9 @@ from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperato
 from kubernetes.client import models as k8s
 
 # Default resource limits for all cs9 tasks
-DEFAULT_RESOURCES = {
-    "limits": {"cpu": "1", "memory": "4Gi"}
-}
+DEFAULT_CONTAINER_RESOURCES = k8s.V1ResourceRequirements(
+    limits={"cpu": "1", "memory": "4Gi"}
+)
 
 # Reusable environment variables for all cs9 tasks
 CS9_ENV_VARS = {
@@ -45,7 +45,7 @@ with DAG(
             "weather_download_and_import_rawdata"
         ],
         env_vars=CS9_ENV_VARS,
-        resources=DEFAULT_RESOURCES,
+        container_resources=DEFAULT_CONTAINER_RESOURCES,
         name="cs9_weather_download_and_import_rawdata",
         namespace="ns-cs9-test",
         is_delete_operator_pod=True,
@@ -62,7 +62,7 @@ with DAG(
             "weather_clean_data"
         ],
         env_vars=CS9_ENV_VARS,
-        resources=DEFAULT_RESOURCES,
+        container_resources=DEFAULT_CONTAINER_RESOURCES,
         name="cs9_weather_clean_data",
         namespace="ns-cs9-test",
         is_delete_operator_pod=True,
