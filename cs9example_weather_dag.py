@@ -4,9 +4,9 @@ from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperato
 from kubernetes.client import models as k8s
 
 # Default resource limits for all cs9 tasks
-DEFAULT_RESOURCES = k8s.V1ResourceRequirements(
-    limits={"cpu": "1", "memory": "4Gi"}
-)
+DEFAULT_RESOURCES = {
+    "limits": {"cpu": "1", "memory": "4Gi"}
+}
 
 # Reusable environment variables for all cs9 tasks
 CS9_ENV_VARS = {
