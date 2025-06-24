@@ -50,8 +50,17 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Run the specified R command (environment variables already set by Kubernetes)
-Rscript -e "${REPOSITORY}::global\$ss\$run_task('${TASK}')"
+# Set CS9 environment variables in R from Kubernetes environment
+ENV_COMMAND=""
+for var in CS9_DBCONFIG_USER CS9_DBCONFIG_PASSWORD CS9_AUTO CS9_PATH CS9_DBCONFIG_ACCESS CS9_DBCONFIG_DRIVER CS9_DBCONFIG_PORT CS9_DBCONFIG_SSLMODE CS9_DBCONFIG_ROLE_CREATE_TABLE CS9_DBCONFIG_SERVER CS9_DBCONFIG_SCHEMA_CONFIG CS9_DBCONFIG_DB_CONFIG CS9_DBCONFIG_SCHEMA_ANON CS9_DBCONFIG_DB_ANON; do
+  if [ ! -z "${!var}" ]; then
+    escaped_value="${!var//\"/\\\"}"
+    ENV_COMMAND="${ENV_COMMAND}Sys.setenv(${var}=\"${escaped_value}\"); "
+  fi
+done
+
+# Run the specified R command with environment variables
+Rscript -e "${ENV_COMMAND}${REPOSITORY}::global\$ss\$run_task('${TASK}')"
 
 # Check if the R command execution was successful
 if [ $? -ne 0 ]; then
