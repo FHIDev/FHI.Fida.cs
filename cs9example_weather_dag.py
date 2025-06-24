@@ -14,10 +14,11 @@ with DAG(
         task_id="weather_download_and_import",
         image="ghcr.io/fhidev/fhi.fida.cs/cs9base:latest",
         image_pull_policy="Always",
-        cmds=["/usr/local/bin/install_ss_and_run_task.sh"],
+        cmds=["/usr/local/bin/install_ss_and_run_task_v2.sh"],
         arguments=[
-            "csids",
+            "https://github.com/csids/cs9example.git",
             "cs9example", 
+            "main",
             "weather_download_and_import_rawdata",
             "CS9_DBCONFIG_USER=yourusername",
             "CS9_DBCONFIG_PASSWORD=yourStrongPassword100",
