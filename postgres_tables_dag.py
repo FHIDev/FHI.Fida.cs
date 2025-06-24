@@ -15,7 +15,7 @@ with DAG(
         image="postgres:15",
         cmds=["psql"],
         arguments=[
-            "postgresql://workbench_user:workbench_pass@postgres-service.ns-cs9-test.svc.cluster.local:5432/workbench_db",
+            "postgresql://yourusername:yourStrongPassword100@postgres-service.ns-cs9-test.svc.cluster.local:5432/postgres",
             "-c",
             "SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name;"
         ],
