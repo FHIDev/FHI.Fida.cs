@@ -6,6 +6,8 @@ resources:
   - wn-deployment.yaml
   - wn-service.yaml
   - wn-ingress.yaml
+  - postgres-deployment.yaml
+  - postgres-service.yaml
   - airflow1.yaml
   - an-ingress.yaml
 nameSuffix: test
