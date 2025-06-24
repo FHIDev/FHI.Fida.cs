@@ -1,19 +1,21 @@
 #!/bin/bash
 
-# Check if at least four arguments are provided
-if [ "$#" -lt 4 ]; then
-  echo "Usage: $0 <repo_url> <repository> <branch> <task> [ENV_VAR1=value1] [ENV_VAR2=value2] ..."
-  echo "Example: $0 https://github.com/csids/cs9example.git cs9example main weather_download_and_import_rawdata"
+# Check if at least three arguments are provided
+if [ "$#" -lt 3 ]; then
+  echo "Usage: $0 <repo_url> <branch> <task> [ENV_VAR1=value1] [ENV_VAR2=value2] ..."
+  echo "Example: $0 https://github.com/csids/cs9example.git main weather_download_and_import_rawdata"
   exit 1
 fi
 
 REPO_URL=$1
-REPOSITORY=$2
-BRANCH=$3
-TASK=$4
+BRANCH=$2
+TASK=$3
 
-# Environment variables start at position 5
-ENV_START=5
+# Extract repository name from URL (remove .git suffix and get basename)
+REPOSITORY=$(basename "$REPO_URL" .git)
+
+# Environment variables start at position 4
+ENV_START=4
 
 # Clone the repository and checkout the specified branch
 git -C / clone -b "$BRANCH" "$REPO_URL"
