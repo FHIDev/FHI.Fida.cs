@@ -1,6 +1,6 @@
 from datetime import datetime
 from airflow import DAG
-from airflow.providers.docker.operators.docker import DockerOperator
+from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 
 with DAG(
     dag_id="hello_world_docker",
@@ -10,12 +10,13 @@ with DAG(
     tags=["example"],
 ) as dag:
 
-    hello_task = DockerOperator(
+    hello_task = KubernetesPodOperator(
         task_id="echo_hello",
-        image="alpine:latest",  # Small and quick for echo
-        command='echo "hello world"',
-        docker_url="unix://var/run/docker.sock",
-        network_mode="bridge",
-        auto_remove="success",
+        image="alpine:latest",
+        cmds=["echo"],
+        arguments=["hello world"],
+        name="hello-world-pod",
+        namespace="default",
+        is_delete_operator_pod=True,
     )
     
