@@ -1,4 +1,5 @@
 apiVersion: source.toolkit.fluxcd.io/v1
+# view config doc here: https://github.com/apache/airflow/blob/main/chart/values.yaml
 kind: HelmRepository
 metadata:
   name: airflow-helm-repo2
