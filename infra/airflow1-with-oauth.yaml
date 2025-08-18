@@ -1,0 +1,180 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: airflow-webserver-config
+  namespace: ns-cs9-test
+  labels:
+    app.kubernetes.io/name: airflow
+    app.kubernetes.io/component: webserver-config
+data:
+  webserver_config.py: |-
+    from __future__ import annotations
+
+    import os
+
+    from airflow.www.fab_security.manager import AUTH_OAUTH
+    from airflow.auth.managers.fab.security_manager.override import FabAirflowSecurityManagerOverride
+    from airflow.utils.log.logging_mixin import LoggingMixin
+
+    # Flask-WTF flag for CSRF
+    WTF_CSRF_ENABLED = True
+    WTF_CSRF_TIME_LIMIT = None
+
+    # Azure AD Configuration - validate required environment variables
+    AZURE_AD_TENANT_ID = os.getenv("AZURE_AD_TENANT_ID")
+    AZURE_AD_CLIENT_ID = os.getenv("AZURE_AD_CLIENT_ID")
+    AZURE_AD_CLIENT_SECRET = os.getenv("AZURE_AD_CLIENT_SECRET")
+
+    # Validate that all required Azure AD environment variables are set
+    if not all([AZURE_AD_TENANT_ID, AZURE_AD_CLIENT_ID, AZURE_AD_CLIENT_SECRET]):
+        raise ValueError("Required Azure AD environment variables are not set: AZURE_AD_TENANT_ID, AZURE_AD_CLIENT_ID, AZURE_AD_CLIENT_SECRET")
+
+    AUTH_TYPE = AUTH_OAUTH
+
+    OAUTH_PROVIDERS = [{
+        'name':'azure',
+        'token_key':'access_token',
+        'icon':'fa-windows',
+        'remote_app': {
+            'api_base_url': f"https://login.microsoftonline.com/{AZURE_AD_TENANT_ID}",
+            'request_token_url': None,
+            'request_token_params': {
+                'scope': 'openid email profile'
+            },
+            'access_token_url': f"https://login.microsoftonline.com/{AZURE_AD_TENANT_ID}/oauth2/v2.0/token",
+            "access_token_params": {
+                'scope': 'openid email profile'
+            },
+            'authorize_url': f"https://login.microsoftonline.com/{AZURE_AD_TENANT_ID}/oauth2/v2.0/authorize",
+            "authorize_params": {
+                'scope': 'openid email profile'
+            },
+            'client_id': f"{AZURE_AD_CLIENT_ID}",
+            'client_secret': f"{AZURE_AD_CLIENT_SECRET}",
+            'jwks_uri': f'https://login.microsoftonline.com/{AZURE_AD_TENANT_ID}/discovery/v2.0/keys'
+        }
+    }]
+
+    # User Registration and Role Mapping
+    AUTH_USER_REGISTRATION_ROLE = "Public"
+    AUTH_USER_REGISTRATION = True
+    AUTH_ROLES_SYNC_AT_LOGIN = True
+
+    # Map Azure App Roles to Airflow Roles
+    AUTH_ROLES_MAPPING = {
+        "Admin": ["Admin"],
+        "Op": ["Op"],
+        "Viewer": ["Viewer"],
+        "Public": ["Public"],
+    }
+
+    class AzureCustomSecurity(FabAirflowSecurityManagerOverride, LoggingMixin):
+        def get_oauth_user_info(self, provider, response=None):
+            self.log.debug(f"Parsing JWT token for provider: {provider}")
+
+            try:
+                me = super().get_oauth_user_info(provider, response)
+            except Exception as e:
+                self.log.error(f"OAuth user info retrieval failed for provider {provider}: {e}", exc_info=True)
+                raise  # Re-raise to halt authentication flow
+
+            self.log.debug(f"Successfully parsed JWT token for user: {me.get('email', 'unknown')}")
+            return {
+                "name": me["first_name"] + " " + me["last_name"],
+                "email": me["email"],
+                "first_name": me["first_name"],
+                "last_name": me["last_name"],
+                "id": me["username"],
+                "username": me["email"],
+                "role_keys": me.get("role_keys", ["Public"])
+            }
+
+    # Security Manager Configuration
+    FAB_SECURITY_MANAGER_CLASS = 'webserver_config.AzureCustomSecurity'
+    SECURITY_MANAGER_CLASS = AzureCustomSecurity
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+# view config doc here: https://github.com/apache/airflow/blob/main/chart/values.yaml
+kind: HelmRepository
+metadata:
+  name: airflow-helm-repo2
+  namespace: ns-cs9-test
+spec:
+  interval: 1m
+  url: https://airflow.apache.org
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: airflow
+  namespace: ns-cs9-test
+spec:
+  releaseName: airflow
+  interval: 5m
+  timeout: 5m
+  chart:
+    spec:
+      chart: airflow
+      version: 1.16.0
+      sourceRef:
+        kind: HelmRepository
+        name: airflow-helm-repo2
+        namespace: ns-cs9-test
+  values:
+    webserver:
+      defaultUser:
+        enabled: true  # Keep enabled during testing phase
+      env:
+        - name: AZURE_AD_TENANT_ID
+          valueFrom:
+            secretKeyRef:
+              name: airflow-azure-oauth
+              key: tenant-id
+        - name: AZURE_AD_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: airflow-azure-oauth
+              key: client-id
+        - name: AZURE_AD_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: airflow-azure-oauth
+              key: client-secret
+      extraVolumes:
+        - name: webserver-config
+          configMap:
+            name: airflow-webserver-config
+      extraVolumeMounts:
+        - name: webserver-config
+          mountPath: /opt/airflow/webserver_config.py
+          subPath: webserver_config.py
+          readOnly: true
+    dags:
+      persistence:
+        enabled: false  # Disable DAG volume mount that would override gitSync
+      gitSync:
+        enabled: true
+        repo: https://github.com/FHIDev/FHI.Fida.cs.git
+        branch: skybert-airflow-dags
+        subPath: ""  # if your DAG files are inside a 'dags/' folder in the repo root
+        depth: 1
+
+    createUserJob:
+      useHelmHooks: false
+      applyCustomEnv: false
+    migrateDatabaseJob:
+      useHelmHooks: false
+      applyCustomEnv: false
+    postgresql:
+      enabled: false
+    redis:
+      enabled: true
+    data:
+      metadataConnection:
+         user: altformyerettigheter
+         pass: portalazurecomcreateMicrosoftPostgreSQLServer
+         protocol: postgresql
+         host: airflow-cs9-test.postgres.database.azure.com
+         port: 5432
+         db: postgres
+         sslmode: prefer
