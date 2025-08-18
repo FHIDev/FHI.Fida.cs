@@ -10,6 +10,7 @@ resources:
   - postgres-service.yaml
   - postgres-init-configmap.yaml
   - airflow1.yaml
+  - airflow1-with-oauth.yaml
   - an-ingress.yaml
 namespace: ns-cs9-test
 #commonLabels:
