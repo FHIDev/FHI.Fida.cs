@@ -51,24 +51,20 @@ spec:
         - name: webserver-config
           configMap:
             name: airflow-webserver-config
+        - name: azure-secrets
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: akv-cs9-test
       extraVolumeMounts:
         - name: webserver-config
           mountPath: /opt/airflow/webserver_config.py
           subPath: webserver_config.py
           readOnly: true
-      env:
-        - name: AZURE_AD_TENANT_ID
-          value: "54475f80-1baa-4ea9-9185-c0de5cc603fe"
-        - name: AZURE_AD_CLIENT_ID
-          valueFrom:
-            secretKeyRef:
-              name: airflow-azure-secrets
-              key: client-id
-        - name: AZURE_AD_CLIENT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: airflow-azure-secrets
-              key: client-secret
+        - name: azure-secrets
+          mountPath: /opt/airflow/secrets/
+          readOnly: true
 
     data:
       metadataConnection:

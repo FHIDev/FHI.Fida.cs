@@ -7,7 +7,7 @@ metadata:
     app.kubernetes.io/name: airflow
     app.kubernetes.io/component: webserver-config
 data:
-  webserver_config.py: |-
+  webserver_config.py: |
     from __future__ import annotations
 
     import os
@@ -20,14 +20,25 @@ data:
     WTF_CSRF_ENABLED = True
     WTF_CSRF_TIME_LIMIT = None
 
-    # Azure AD Configuration - validate required environment variables
-    AZURE_AD_TENANT_ID = os.getenv("AZURE_AD_TENANT_ID")
-    AZURE_AD_CLIENT_ID = os.getenv("AZURE_AD_CLIENT_ID")
-    AZURE_AD_CLIENT_SECRET = os.getenv("AZURE_AD_CLIENT_SECRET")
+    # Azure AD Configuration - read from CSI-mounted secret files
+    def read_secret_file(filename):
+        """Read secret from CSI-mounted file with robust error handling."""
+        try:
+            with open(f'/opt/airflow/secrets/{filename}', 'r') as f:
+                content = f.read().strip()
+                if not content:
+                    raise ValueError(f"Secret file {filename} is empty")
+                return content
+        except FileNotFoundError:
+            raise ValueError(f"Secret file not found: /opt/airflow/secrets/{filename}")
+        except PermissionError:
+            raise ValueError(f"Permission denied reading secret file: /opt/airflow/secrets/{filename}")
+        except Exception as e:
+            raise ValueError(f"Failed to read secret {filename}: {e}")
 
-    # Validate that all required Azure AD environment variables are set
-    if not all([AZURE_AD_TENANT_ID, AZURE_AD_CLIENT_ID, AZURE_AD_CLIENT_SECRET]):
-        raise ValueError("Required Azure AD environment variables are not set: AZURE_AD_TENANT_ID, AZURE_AD_CLIENT_ID, AZURE_AD_CLIENT_SECRET")
+    AZURE_AD_TENANT_ID = read_secret_file('tenant-id')
+    AZURE_AD_CLIENT_ID = read_secret_file('openid-airflow-client-id')
+    AZURE_AD_CLIENT_SECRET = read_secret_file('openid-airflow-client-secret')
 
     AUTH_TYPE = AUTH_OAUTH
 
