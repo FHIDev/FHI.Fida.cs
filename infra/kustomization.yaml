@@ -11,6 +11,7 @@ resources:
   - postgres-init-configmap.yaml
   - airflow1.yaml
   - airflow1-with-oauth.yaml
+  - airflow-pod-template-configmap.yaml
   - an-ingress.yaml
 namespace: ns-cs9-test
 #commonLabels:
