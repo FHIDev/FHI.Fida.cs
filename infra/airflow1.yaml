@@ -45,7 +45,7 @@ spec:
     postgresql:
       enabled: false
     redis:
-      enabled: true
+      enabled: false  # Disabled - not needed for KubernetesExecutor
     webserver:
       extraVolumes:
         - name: webserver-config
@@ -69,6 +69,28 @@ spec:
             secretKeyRef:
               name: airflow-azure-secrets
               key: client-secret
+      extraVolumes:
+        - name: pod-template
+          configMap:
+            name: airflow-pod-template
+      extraVolumeMounts:
+        - name: pod-template
+          mountPath: /opt/airflow/pod_template.yaml
+          subPath: pod_template.yaml
+          readOnly: true
+
+    # KubernetesExecutor Configuration
+    config:
+      core:
+        executor: KubernetesExecutor
+      kubernetes:
+        namespace: ns-cs9-test
+        pod_template_file: /opt/airflow/pod_template.yaml
+        worker_container_repository: apache/airflow
+        worker_container_tag: "2.10.4"
+        delete_worker_pods: true
+        delete_worker_pods_on_success: true
+        delete_worker_pods_on_failure: false
 
     data:
       metadataConnection:

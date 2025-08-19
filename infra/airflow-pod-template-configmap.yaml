@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: airflow-pod-template
+  namespace: ns-cs9-test
+  labels:
+    app.kubernetes.io/name: airflow
+    app.kubernetes.io/component: pod-template
+data:
+  pod_template.yaml: |
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: placeholder-name
+      namespace: ns-cs9-test
+      labels:
+        tier: airflow
+        component: worker
+        release: airflow
+        app: airflow
+    spec:
+      restartPolicy: Never
+      serviceAccountName: airflow
+      securityContext:
+        runAsUser: 50000
+        fsGroup: 50000
+      initContainers:
+      - name: git-sync-init
+        image: registry.k8s.io/git-sync/git-sync:v4.3.0
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: GITSYNC_ONE_TIME
+          value: "true"  # Sync once and exit
+        - name: GITSYNC_REPO
+          value: "https://github.com/FHIDev/FHI.Fida.cs.git"
+        - name: GITSYNC_BRANCH
+          value: "skybert-airflow-dags"
+        - name: GITSYNC_ROOT
+          value: "/opt/airflow/dags"
+        - name: GITSYNC_DEST
+          value: "repo"
+        - name: GITSYNC_DEPTH
+          value: "1"
+        - name: GITSYNC_VERBOSE
+          value: "1"
+        volumeMounts:
+        - name: dags
+          mountPath: /opt/airflow/dags
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          runAsUser: 65533
+          runAsGroup: 65533
+      containers:
+      - name: base
+        image: apache/airflow:2.10.4
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: worker-logs
+          containerPort: 8793
+        env:
+        # Azure AD OAuth Configuration
+        - name: AZURE_AD_TENANT_ID
+          value: "54475f80-1baa-4ea9-9185-c0de5cc603fe"
+        - name: AZURE_AD_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: airflow-azure-secrets
+              key: client-id
+        - name: AZURE_AD_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: airflow-azure-secrets
+              key: client-secret
+        # Airflow Database Configuration (from Helm values)
+        - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+          value: "postgresql+psycopg2://altformyerettigheter:portalazurecomcreateMicrosoftPostgreSQLServer@airflow-cs9-test.postgres.database.azure.com:5432/postgres?sslmode=prefer"
+        # Core Airflow Configuration
+        - name: AIRFLOW__CORE__EXECUTOR
+          value: "KubernetesExecutor"
+        - name: AIRFLOW__CORE__DAGS_FOLDER
+          value: "/opt/airflow/dags/repo"
+        - name: AIRFLOW__CORE__FERNET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: airflow-fernet-key
+              key: fernet-key
+        - name: AIRFLOW__WEBSERVER__SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: airflow-webserver-secret-key
+              key: webserver-secret-key
+        # Logging Configuration
+        - name: AIRFLOW__LOGGING__LOGGING_LEVEL
+          value: "INFO"
+        volumeMounts:
+        - name: dags
+          mountPath: /opt/airflow/dags
+          readOnly: true
+        - name: logs
+          mountPath: /opt/airflow/logs
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 1
+            memory: 1Gi
+      volumes:
+      - name: dags
+        emptyDir: {}
+      - name: logs
+        emptyDir: {}
