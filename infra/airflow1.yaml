@@ -81,7 +81,7 @@ spec:
         namespace: ns-cs9-test
         pod_template_file: /opt/airflow/pod_template.yaml
         worker_container_repository: apache/airflow
-        worker_container_tag: "2.8.0"
+        worker_container_tag: "3.0.5"
         delete_worker_pods: true
         delete_worker_pods_on_success: true
         delete_worker_pods_on_failure: false

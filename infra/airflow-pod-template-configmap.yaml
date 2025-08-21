@@ -58,7 +58,7 @@ data:
           runAsGroup: 65533
       containers:
       - name: base
-        image: apache/airflow:2.8.0
+        image: apache/airflow:3.0.5
         imagePullPolicy: IfNotPresent
         ports:
         - name: worker-logs
