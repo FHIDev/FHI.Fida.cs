@@ -67,16 +67,10 @@ data:
         # Azure AD OAuth Configuration
         - name: AZURE_AD_TENANT_ID
           value: "54475f80-1baa-4ea9-9185-c0de5cc603fe"
-        - name: AZURE_AD_CLIENT_ID
-          valueFrom:
-            secretKeyRef:
-              name: airflow-azure-secrets
-              key: client-id
-        - name: AZURE_AD_CLIENT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: airflow-azure-secrets
-              key: client-secret
+        - name: AZURE_AD_CLIENT_ID_FILE
+          value: "/etc/secrets/azure/client-id"
+        - name: AZURE_AD_CLIENT_SECRET_FILE
+          value: "/etc/secrets/azure/client-secret"
         # Airflow Database Configuration (from Helm values)
         - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
           value: "postgresql+psycopg2://altformyerettigheter:portalazurecomcreateMicrosoftPostgreSQLServer@airflow-cs9-test.postgres.database.azure.com:5432/postgres?sslmode=prefer"
@@ -85,16 +79,10 @@ data:
           value: "KubernetesExecutor"
         - name: AIRFLOW__CORE__DAGS_FOLDER
           value: "/opt/airflow/dags/repo"
-        - name: AIRFLOW__CORE__FERNET_KEY
-          valueFrom:
-            secretKeyRef:
-              name: airflow-fernet-key
-              key: fernet-key
-        - name: AIRFLOW__WEBSERVER__SECRET_KEY
-          valueFrom:
-            secretKeyRef:
-              name: airflow-webserver-secret-key
-              key: webserver-secret-key
+        - name: AIRFLOW__CORE__FERNET_KEY_FILE
+          value: "/etc/secrets/fernet/fernet-key"
+        - name: AIRFLOW__WEBSERVER__SECRET_KEY_FILE
+          value: "/etc/secrets/webserver/webserver-secret-key"
         # Logging Configuration
         - name: AIRFLOW__LOGGING__LOGGING_LEVEL
           value: "INFO"
@@ -104,6 +92,15 @@ data:
           readOnly: true
         - name: logs
           mountPath: /opt/airflow/logs
+        - name: azure-secrets
+          mountPath: /etc/secrets/azure
+          readOnly: true
+        - name: fernet-key
+          mountPath: /etc/secrets/fernet
+          readOnly: true
+        - name: webserver-secret
+          mountPath: /etc/secrets/webserver
+          readOnly: true
         resources:
           requests:
             cpu: 100m
@@ -116,3 +113,15 @@ data:
         emptyDir: {}
       - name: logs
         emptyDir: {}
+      - name: azure-secrets
+        secret:
+          secretName: airflow-azure-secrets
+          defaultMode: 0400
+      - name: fernet-key
+        secret:
+          secretName: airflow-fernet-key
+          defaultMode: 0400
+      - name: webserver-secret
+        secret:
+          secretName: airflow-webserver-secret-key
+          defaultMode: 0400
