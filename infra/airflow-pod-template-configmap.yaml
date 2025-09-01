@@ -79,10 +79,8 @@ data:
           value: "KubernetesExecutor"
         - name: AIRFLOW__CORE__DAGS_FOLDER
           value: "/opt/airflow/dags/repo"
-        - name: AIRFLOW__CORE__FERNET_KEY_FILE
-          value: "/etc/secrets/fernet/fernet-key"
-        - name: AIRFLOW__WEBSERVER__SECRET_KEY_FILE
-          value: "/etc/secrets/webserver/webserver-secret-key"
+        - name: AIRFLOW__CORE__FERNET_KEY_CMD
+          value: "cat /etc/secrets/fernet/fernet-key"
         # Logging Configuration
         - name: AIRFLOW__LOGGING__LOGGING_LEVEL
           value: "INFO"
@@ -97,9 +95,6 @@ data:
           readOnly: true
         - name: fernet-key
           mountPath: /etc/secrets/fernet
-          readOnly: true
-        - name: webserver-secret
-          mountPath: /etc/secrets/webserver
           readOnly: true
         resources:
           requests:
@@ -120,8 +115,4 @@ data:
       - name: fernet-key
         secret:
           secretName: airflow-fernet-key
-          defaultMode: 0400
-      - name: webserver-secret
-        secret:
-          secretName: airflow-webserver-secret-key
           defaultMode: 0400
