@@ -18,9 +18,10 @@ data:
         component: worker
         release: airflow
         app: airflow
+        azure.workload.identity/use: "true"
     spec:
       restartPolicy: Never
-      serviceAccountName: airflow
+      serviceAccountName: airflow-worker-default
       securityContext:
         runAsUser: 50000
         fsGroup: 50000
@@ -67,10 +68,8 @@ data:
         # Azure AD OAuth Configuration
         - name: AZURE_AD_TENANT_ID
           value: "54475f80-1baa-4ea9-9185-c0de5cc603fe"
-        - name: AZURE_AD_CLIENT_ID_FILE
-          value: "/etc/secrets/azure/client-id"
-        - name: AZURE_AD_CLIENT_SECRET_FILE
-          value: "/etc/secrets/azure/client-secret"
+        # Azure AD configuration now handled via workload identity
+        # Client ID and secret no longer needed as files
         # Airflow Database Configuration (from Helm values)
         - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
           value: "postgresql+psycopg2://altformyerettigheter:portalazurecomcreateMicrosoftPostgreSQLServer@airflow-cs9-test.postgres.database.azure.com:5432/postgres?sslmode=prefer"
@@ -90,9 +89,7 @@ data:
           readOnly: true
         - name: logs
           mountPath: /opt/airflow/logs
-        - name: azure-secrets
-          mountPath: /etc/secrets/azure
-          readOnly: true
+        # azure-secrets volume mount removed - using workload identity
         - name: fernet-key
           mountPath: /etc/secrets/fernet
           readOnly: true
@@ -108,10 +105,7 @@ data:
         emptyDir: {}
       - name: logs
         emptyDir: {}
-      - name: azure-secrets
-        secret:
-          secretName: airflow-azure-secrets
-          defaultMode: 0400
+      # azure-secrets volume removed - using workload identity for Azure authentication
       - name: fernet-key
         secret:
           secretName: airflow-fernet-key
