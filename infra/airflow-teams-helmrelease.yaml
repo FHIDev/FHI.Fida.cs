@@ -1,0 +1,55 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: fhi-fida-cs-source
+  namespace: ns-cs9-test
+spec:
+  interval: 1m
+  url: https://github.com/FHIDev/FHI.Fida.cs.git
+  ref:
+    branch: main
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: airflow-teams
+  namespace: ns-cs9-test
+spec:
+  releaseName: airflow-teams
+  interval: 5m
+  timeout: 5m
+  chart:
+    spec:
+      chart: infra/charts/airflow-teams
+      sourceRef:
+        kind: GitRepository
+        name: fhi-fida-cs-source
+        namespace: ns-cs9-test
+  values:
+    # Teams configuration can be overridden here or use default values.yaml
+    teams:
+      - name: alvi
+        clientId: "PLACEHOLDER_ALVI_MANAGED_IDENTITY_CLIENT_ID"
+      - name: risiko-vvp
+        clientId: "PLACEHOLDER_RISIKO_VVP_MANAGED_IDENTITY_CLIENT_ID"
+      - name: tot-mort
+        clientId: "PLACEHOLDER_TOT_MORT_MANAGED_IDENTITY_CLIENT_ID"
+      - name: vak-dek
+        clientId: "PLACEHOLDER_VAK_DEK_MANAGED_IDENTITY_CLIENT_ID"
+      - name: vak-sik
+        clientId: "PLACEHOLDER_VAK_SIK_MANAGED_IDENTITY_CLIENT_ID"
+      - name: vax-eff-mist
+        clientId: "PLACEHOLDER_VAX_EFF_MIST_MANAGED_IDENTITY_CLIENT_ID"
+      - name: vax-eff-vvp
+        clientId: "PLACEHOLDER_VAX_EFF_VVP_MANAGED_IDENTITY_CLIENT_ID"
+    
+    namespace: ns-cs9-test
+    
+    rbac:
+      clusterRole: view
+      roleBindingName: rb-airflow-teams
+    
+    serviceAccount:
+      namePrefix: airflow-worker-team-
+      commonLabels:
+        azure.workload.identity/use: "true"

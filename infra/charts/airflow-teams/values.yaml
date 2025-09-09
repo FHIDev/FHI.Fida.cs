@@ -1,0 +1,53 @@
+# Default values for airflow-teams chart
+# This is a YAML-formatted file with team configurations
+
+# Teams configuration - single source of truth for all team service accounts
+teams:
+  - name: alvi
+    # Replace with actual Azure AD application client ID for team alvi
+    clientId: "PLACEHOLDER_ALVI_MANAGED_IDENTITY_CLIENT_ID"
+  - name: risiko-vvp
+    # Replace with actual Azure AD application client ID for team risiko-vvp
+    clientId: "PLACEHOLDER_RISIKO_VVP_MANAGED_IDENTITY_CLIENT_ID"
+  - name: tot-mort
+    # Replace with actual Azure AD application client ID for team tot-mort
+    clientId: "PLACEHOLDER_TOT_MORT_MANAGED_IDENTITY_CLIENT_ID"
+  - name: vak-dek
+    # Replace with actual Azure AD application client ID for team vak-dek
+    clientId: "PLACEHOLDER_VAK_DEK_MANAGED_IDENTITY_CLIENT_ID"
+  - name: vak-sik
+    # Replace with actual Azure AD application client ID for team vak-sik
+    clientId: "PLACEHOLDER_VAK_SIK_MANAGED_IDENTITY_CLIENT_ID"
+  - name: vax-eff-mist
+    # Replace with actual Azure AD application client ID for team vax-eff-mist
+    clientId: "PLACEHOLDER_VAX_EFF_MIST_MANAGED_IDENTITY_CLIENT_ID"
+  - name: vax-eff-vvp
+    # Replace with actual Azure AD application client ID for team vax-eff-vvp
+    clientId: "PLACEHOLDER_VAX_EFF_VVP_MANAGED_IDENTITY_CLIENT_ID"
+
+# Kubernetes namespace where service accounts will be created
+namespace: ns-cs9-test
+
+# RBAC configuration
+rbac:
+  # ClusterRole to assign to all team service accounts
+  clusterRole: view
+  # Name for the RoleBinding that grants permissions to all teams
+  roleBindingName: rb-airflow-teams
+
+# Service account configuration
+serviceAccount:
+  # Common prefix for all team service accounts
+  namePrefix: airflow-worker-team-
+  # Labels applied to all service accounts
+  commonLabels:
+    azure.workload.identity/use: "true"
+  # Additional annotations (beyond the client-id annotation)
+  additionalAnnotations: {}
+
+# Chart metadata
+chart:
+  # Version of this configuration format
+  version: "1.0"
+  # Description for generated resources
+  description: "Multi-team Airflow worker service accounts with Azure Workload Identity"

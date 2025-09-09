@@ -1,0 +1,24 @@
+{{/*
+Create RoleBinding that grants ClusterRole permissions to all team service accounts
+*/}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Values.rbac.roleBindingName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    app.kubernetes.io/name: {{ include "airflow-teams.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: rbac
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Values.rbac.clusterRole }}
+subjects:
+{{- range .Values.teams }}
+- kind: ServiceAccount
+  name: {{ $.Values.serviceAccount.namePrefix }}{{ .name }}
+  namespace: {{ $.Values.namespace }}
+{{- end }}
