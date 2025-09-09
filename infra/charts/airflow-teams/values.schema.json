@@ -101,14 +101,6 @@
         }
       },
       "additionalProperties": false
-    },
-    "nameOverride": {
-      "type": "string",
-      "description": "Override the chart name"
-    },
-    "fullnameOverride": {
-      "type": "string",
-      "description": "Override the full name used for resources"
     }
   },
   "additionalProperties": false
