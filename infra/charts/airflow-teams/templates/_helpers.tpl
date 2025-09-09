@@ -2,7 +2,7 @@
 Expand the name of the chart.
 */}}
 {{- define "airflow-teams.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- default .Chart.Name .Values.nameOverride }}
 {{- end }}
 
 {{/*
@@ -10,13 +10,13 @@ Create a default fully qualified app name.
 */}}
 {{- define "airflow-teams.fullname" -}}
 {{- if .Values.fullnameOverride }}
-{{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- .Values.fullnameOverride }}
 {{- else }}
 {{- $name := default .Chart.Name .Values.nameOverride }}
 {{- if contains $name .Release.Name }}
-{{- .Release.Name | trunc 63 | trimSuffix "-" }}
+{{- .Release.Name }}
 {{- else }}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" }}
+{{- printf "%s-%s" .Release.Name $name }}
 {{- end }}
 {{- end }}
 {{- end }}
@@ -25,7 +25,7 @@ Create a default fully qualified app name.
 Create chart name and version as used by the chart label.
 */}}
 {{- define "airflow-teams.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" }}
 {{- end }}
 
 {{/*
