@@ -13,5 +13,7 @@ keywords:
 home: https://github.com/FHIDev/FHI.Fida.cs
 sources:
   - https://github.com/FHIDev/FHI.Fida.cs
+icon: https://airflow.apache.org/docs/apache-airflow/1.10.6/_images/pin_large.png
 maintainers:
-  - name: FHI Team
+  - name: Torbjørn Lindahl
+    email: torbjorn.lindahl@fhi.no

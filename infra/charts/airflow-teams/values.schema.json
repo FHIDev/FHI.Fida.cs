@@ -1,0 +1,115 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Airflow Teams Chart Values",
+  "description": "Schema for validating airflow-teams Helm chart values",
+  "type": "object",
+  "required": ["teams", "namespace"],
+  "properties": {
+    "teams": {
+      "type": "array",
+      "description": "List of teams with their Azure Workload Identity configuration",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "clientId"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Team name (used in service account naming)",
+            "pattern": "^[a-z0-9-]+$",
+            "minLength": 1,
+            "maxLength": 63
+          },
+          "clientId": {
+            "type": "string",
+            "description": "Azure AD application client ID for the team's managed identity (replace PLACEHOLDER_ values with actual client IDs)",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "namespace": {
+      "type": "string",
+      "description": "Kubernetes namespace where resources will be created",
+      "pattern": "^[a-z0-9-]+$",
+      "minLength": 1,
+      "maxLength": 63
+    },
+    "rbac": {
+      "type": "object",
+      "description": "RBAC configuration for team service accounts",
+      "properties": {
+        "clusterRole": {
+          "type": "string",
+          "description": "ClusterRole to assign to all team service accounts",
+          "default": "view"
+        },
+        "roleBindingName": {
+          "type": "string",
+          "description": "Name for the RoleBinding resource",
+          "pattern": "^[a-z0-9-]+$",
+          "default": "rb-airflow-teams"
+        }
+      },
+      "additionalProperties": false
+    },
+    "serviceAccount": {
+      "type": "object",
+      "description": "Service account configuration",
+      "properties": {
+        "namePrefix": {
+          "type": "string",
+          "description": "Prefix for all team service account names",
+          "pattern": "^[a-z0-9-]*$",
+          "default": "airflow-worker-team-"
+        },
+        "commonLabels": {
+          "type": "object",
+          "description": "Common labels applied to all service accounts",
+          "patternProperties": {
+            "^[a-zA-Z0-9/_.-]+$": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        },
+        "additionalAnnotations": {
+          "type": "object",
+          "description": "Additional annotations (beyond client-id) for service accounts",
+          "patternProperties": {
+            "^[a-zA-Z0-9/_.-]+$": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "chart": {
+      "type": "object",
+      "description": "Chart metadata configuration",
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "Configuration format version"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description for generated resources"
+        }
+      },
+      "additionalProperties": false
+    },
+    "nameOverride": {
+      "type": "string",
+      "description": "Override the chart name"
+    },
+    "fullnameOverride": {
+      "type": "string",
+      "description": "Override the full name used for resources"
+    }
+  },
+  "additionalProperties": false
+}
