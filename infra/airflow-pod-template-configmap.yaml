@@ -21,7 +21,8 @@ data:
         azure.workload.identity/use: "true"
     spec:
       restartPolicy: Never
-      serviceAccountName: airflow-worker-default
+      # serviceAccountName must be specified in DAG pod_override
+      # Use: pod_override=k8s.V1Pod(spec=k8s.V1PodSpec(service_account_name="airflow-worker-team-{your-team}"))
       securityContext:
         runAsUser: 50000
         fsGroup: 50000
