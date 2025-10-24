@@ -8,9 +8,10 @@ from teams.config import get_team_config
 TEAM_NAME = "norsyss"
 TEAM_CONFIG = get_team_config(TEAM_NAME)
 
-# Default resource limits for all cs9 tasks
+# Default resource limits for all cs9 tasks (must not exceed Kyverno policy: CPU <= 2, Memory <= 2Gi)
 DEFAULT_CONTAINER_RESOURCES = k8s.V1ResourceRequirements(
-    limits={"cpu": "1", "memory": "4Gi"}
+    requests={"cpu": "1", "memory": "2Gi"},
+    limits={"cpu": "1", "memory": "2Gi"}
 )
 
 # Reusable environment variables for all cs9 tasks
@@ -18,7 +19,7 @@ CS9_ENV_VARS = {
     "CS9_DBCONFIG_USER": "yourusername",
     "CS9_DBCONFIG_PASSWORD": "yourStrongPassword100",
     "CS9_AUTO": "0",
-    "CS9_PATH": "/cs9path",
+    "CS9_PATH": "/work",
     "CS9_DBCONFIG_ACCESS": "config/anon",
     "CS9_DBCONFIG_DRIVER": "PostgreSQL Unicode",
     "CS9_DBCONFIG_PORT": "5432",
