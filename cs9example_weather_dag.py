@@ -2,6 +2,11 @@ from datetime import datetime
 from airflow import DAG
 from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 from kubernetes.client import models as k8s
+from teams.config import get_team_config
+
+# Team configuration: This DAG belongs to the norsyss team
+TEAM_NAME = "norsyss"
+TEAM_CONFIG = get_team_config(TEAM_NAME)
 
 # Default resource limits for all cs9 tasks
 DEFAULT_CONTAINER_RESOURCES = k8s.V1ResourceRequirements(
@@ -47,7 +52,8 @@ with DAG(
         env_vars=CS9_ENV_VARS,
         container_resources=DEFAULT_CONTAINER_RESOURCES,
         name="cs9_weather_download_and_import_rawdata",
-        namespace="ns-cs9-test",
+        namespace="tn-fida-airflow",
+        service_account_name=TEAM_CONFIG["service_account_name"],
         is_delete_operator_pod=True,
     )
 
@@ -64,7 +70,8 @@ with DAG(
         env_vars=CS9_ENV_VARS,
         container_resources=DEFAULT_CONTAINER_RESOURCES,
         name="cs9_weather_clean_data",
-        namespace="ns-cs9-test",
+        namespace="tn-fida-airflow",
+        service_account_name=TEAM_CONFIG["service_account_name"],
         is_delete_operator_pod=True,
     )
 
