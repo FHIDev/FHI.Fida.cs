@@ -68,7 +68,6 @@ with DAG(
         namespace="tn-fida-airflow",
         service_account_name=TEAM_CONFIG["service_account_name"],
         is_delete_operator_pod=False,
-        working_dir="/work",
         volumes=[WORK_VOLUME],
         volume_mounts=[WORK_VOLUME_MOUNT],
     )
@@ -89,7 +88,6 @@ with DAG(
         namespace="tn-fida-airflow",
         service_account_name=TEAM_CONFIG["service_account_name"],
         is_delete_operator_pod=False,
-        working_dir="/work",
         volumes=[WORK_VOLUME],
         volume_mounts=[WORK_VOLUME_MOUNT],
     )
