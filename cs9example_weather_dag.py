@@ -44,6 +44,20 @@ WORK_VOLUME_MOUNT = k8s.V1VolumeMount(
     mount_path="/work"
 )
 
+# Base pod spec that includes the work volume mount in the container
+BASE_POD_SPEC = k8s.V1Pod(
+    spec=k8s.V1PodSpec(
+        containers=[
+            k8s.V1Container(
+                name="base",
+                volume_mounts=[WORK_VOLUME_MOUNT]
+            )
+        ],
+        volumes=[WORK_VOLUME],
+        restart_policy="Never",
+    )
+)
+
 with DAG(
     dag_id="cs9example_weather_download",
     start_date=datetime(2024, 1, 1),
@@ -68,8 +82,7 @@ with DAG(
         namespace="tn-fida-airflow",
         service_account_name=TEAM_CONFIG["service_account_name"],
         is_delete_operator_pod=False,
-        volumes=[WORK_VOLUME],
-        volume_mounts=[WORK_VOLUME_MOUNT],
+        full_pod_spec=BASE_POD_SPEC,
     )
 
     weather_clean_data = KubernetesPodOperator(
@@ -88,8 +101,7 @@ with DAG(
         namespace="tn-fida-airflow",
         service_account_name=TEAM_CONFIG["service_account_name"],
         is_delete_operator_pod=False,
-        volumes=[WORK_VOLUME],
-        volume_mounts=[WORK_VOLUME_MOUNT],
+        full_pod_spec=BASE_POD_SPEC,
     )
 
     # Task dependencies
