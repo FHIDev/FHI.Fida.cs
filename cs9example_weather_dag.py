@@ -44,6 +44,11 @@ WORK_VOLUME_MOUNT = k8s.V1VolumeMount(
     mount_path="/work"
 )
 
+# Security context to allow writing to emptyDir volumes
+SECURITY_CONTEXT = k8s.V1PodSecurityContext(
+    fs_group=1000  # Allow user 1000 to write to emptyDir volumes
+)
+
 with DAG(
     dag_id="cs9example_weather_download",
     start_date=datetime(2024, 1, 1),
@@ -68,6 +73,7 @@ with DAG(
         namespace="tn-fida-airflow",
         service_account_name=TEAM_CONFIG["service_account_name"],
         is_delete_operator_pod=False,
+        security_context=SECURITY_CONTEXT,
         volumes=[WORK_VOLUME],
         volume_mounts=[WORK_VOLUME_MOUNT],
     )
@@ -88,6 +94,7 @@ with DAG(
         namespace="tn-fida-airflow",
         service_account_name=TEAM_CONFIG["service_account_name"],
         is_delete_operator_pod=False,
+        security_context=SECURITY_CONTEXT,
         volumes=[WORK_VOLUME],
         volume_mounts=[WORK_VOLUME_MOUNT],
     )
