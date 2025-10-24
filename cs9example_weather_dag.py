@@ -31,6 +31,19 @@ CS9_ENV_VARS = {
     "CS9_DBCONFIG_DB_ANON": "postgres"
 }
 
+# Writable work volume for CS9 script execution
+# KubernetesPodOperator does not inherit volumes from pod_template_file,
+# so volumes must be explicitly defined here
+WORK_VOLUME = k8s.V1Volume(
+    name="work",
+    empty_dir=k8s.V1EmptyDirVolumeSource()
+)
+
+WORK_VOLUME_MOUNT = k8s.V1VolumeMount(
+    name="work",
+    mount_path="/work"
+)
+
 with DAG(
     dag_id="cs9example_weather_download",
     start_date=datetime(2024, 1, 1),
@@ -55,6 +68,9 @@ with DAG(
         namespace="tn-fida-airflow",
         service_account_name=TEAM_CONFIG["service_account_name"],
         is_delete_operator_pod=False,
+        working_dir="/work",
+        volumes=[WORK_VOLUME],
+        volume_mounts=[WORK_VOLUME_MOUNT],
     )
 
     weather_clean_data = KubernetesPodOperator(
@@ -73,6 +89,9 @@ with DAG(
         namespace="tn-fida-airflow",
         service_account_name=TEAM_CONFIG["service_account_name"],
         is_delete_operator_pod=False,
+        working_dir="/work",
+        volumes=[WORK_VOLUME],
+        volume_mounts=[WORK_VOLUME_MOUNT],
     )
 
     # Task dependencies
