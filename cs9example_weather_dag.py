@@ -54,7 +54,7 @@ with DAG(
         name="cs9_weather_download_and_import_rawdata",
         namespace="tn-fida-airflow",
         service_account_name=TEAM_CONFIG["service_account_name"],
-        is_delete_operator_pod=True,
+        is_delete_operator_pod=False,
     )
 
     weather_clean_data = KubernetesPodOperator(
@@ -72,7 +72,7 @@ with DAG(
         name="cs9_weather_clean_data",
         namespace="tn-fida-airflow",
         service_account_name=TEAM_CONFIG["service_account_name"],
-        is_delete_operator_pod=True,
+        is_delete_operator_pod=False,
     )
 
     # Task dependencies
