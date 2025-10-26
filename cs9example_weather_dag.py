@@ -15,21 +15,22 @@ DEFAULT_CONTAINER_RESOURCES = k8s.V1ResourceRequirements(
 )
 
 # Reusable environment variables for all cs9 tasks
+# Database credentials point to norsyss_test database on airflow-cs9-test.postgres.database.azure.com
 CS9_ENV_VARS = {
-    "CS9_DBCONFIG_USER": "yourusername",
-    "CS9_DBCONFIG_PASSWORD": "yourStrongPassword100",
+    "CS9_DBCONFIG_USER": "norsyss_user",
+    "CS9_DBCONFIG_PASSWORD": "NorsyssTestPass!23#Secure",
     "CS9_AUTO": "0",
     "CS9_PATH": "/work",
     "CS9_DBCONFIG_ACCESS": "config/anon",
     "CS9_DBCONFIG_DRIVER": "PostgreSQL Unicode",
     "CS9_DBCONFIG_PORT": "5432",
     "CS9_DBCONFIG_SSLMODE": "no",
-    "CS9_DBCONFIG_ROLE_CREATE_TABLE": "yourusername",
-    "CS9_DBCONFIG_SERVER": "db",
+    "CS9_DBCONFIG_ROLE_CREATE_TABLE": "norsyss_user",
+    "CS9_DBCONFIG_SERVER": "airflow-cs9-test.postgres.database.azure.com",
     "CS9_DBCONFIG_SCHEMA_CONFIG": "public",
-    "CS9_DBCONFIG_DB_CONFIG": "postgres",
+    "CS9_DBCONFIG_DB_CONFIG": "norsyss_test",
     "CS9_DBCONFIG_SCHEMA_ANON": "public",
-    "CS9_DBCONFIG_DB_ANON": "postgres"
+    "CS9_DBCONFIG_DB_ANON": "norsyss_test"
 }
 
 # Writable work volume for CS9 script execution
