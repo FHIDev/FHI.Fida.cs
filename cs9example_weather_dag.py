@@ -71,7 +71,8 @@ with DAG(
 ) as dag:
 
     # git-sync init container to clone DAG repository
-    # Uses GITSYNC_* variables (not GIT_SYNC_*) for git-sync v4.x
+    # Uses GITSYNC_* variables for git-sync v4.x
+    # Note: --branch is deprecated in favor of --ref, and --dest in favor of --link
     git_sync_init = k8s.V1Container(
         name="git-sync-init",
         image="registry.k8s.io/git-sync/git-sync:v4.3.0",
@@ -79,9 +80,9 @@ with DAG(
         env=[
             k8s.V1EnvVar(name="GITSYNC_ONE_TIME", value="true"),
             k8s.V1EnvVar(name="GITSYNC_REPO", value="https://github.com/FHIDev/FHI.Fida.cs.git"),
-            k8s.V1EnvVar(name="GITSYNC_BRANCH", value="skybert-airflow-dags"),
+            k8s.V1EnvVar(name="GITSYNC_REF", value="skybert-airflow-dags"),  # Replaces deprecated GITSYNC_BRANCH
             k8s.V1EnvVar(name="GITSYNC_ROOT", value="/opt/airflow/dags"),
-            k8s.V1EnvVar(name="GITSYNC_DEST", value="repo"),
+            k8s.V1EnvVar(name="GITSYNC_LINK", value="repo"),  # Replaces deprecated GITSYNC_DEST
             k8s.V1EnvVar(name="GITSYNC_DEPTH", value="1"),
             k8s.V1EnvVar(name="GITSYNC_VERBOSE", value="1"),
         ],
