@@ -57,11 +57,6 @@ GIT_VOLUME_MOUNT = k8s.V1VolumeMount(
     mount_path="/opt/airflow/dags"
 )
 
-# Security context to allow writing to emptyDir volumes
-SECURITY_CONTEXT = k8s.V1PodSecurityContext(
-    fs_group=1000  # Allow user 1000 to write to emptyDir volumes
-)
-
 with DAG(
     dag_id="cs9example_weather_download",
     start_date=datetime(2024, 1, 1),
@@ -113,7 +108,6 @@ with DAG(
         namespace=TEAM_CONFIG["namespace"],
         service_account_name=TEAM_CONFIG["service_account_name"],
         is_delete_operator_pod=False,
-        security_context=SECURITY_CONTEXT,
         volumes=[WORK_VOLUME, GIT_VOLUME],
         volume_mounts=[WORK_VOLUME_MOUNT, GIT_VOLUME_MOUNT],
         init_containers=[git_sync_init],
@@ -135,7 +129,6 @@ with DAG(
         namespace=TEAM_CONFIG["namespace"],
         service_account_name=TEAM_CONFIG["service_account_name"],
         is_delete_operator_pod=False,
-        security_context=SECURITY_CONTEXT,
         volumes=[WORK_VOLUME, GIT_VOLUME],
         volume_mounts=[WORK_VOLUME_MOUNT, GIT_VOLUME_MOUNT],
         init_containers=[git_sync_init],
