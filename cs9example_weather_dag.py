@@ -46,6 +46,17 @@ WORK_VOLUME_MOUNT = k8s.V1VolumeMount(
     mount_path="/work"
 )
 
+# Git volume for DAG bundle syncing (required for Airflow 3.0 SDK execution)
+GIT_VOLUME = k8s.V1Volume(
+    name="dags",
+    empty_dir=k8s.V1EmptyDirVolumeSource()
+)
+
+GIT_VOLUME_MOUNT = k8s.V1VolumeMount(
+    name="dags",
+    mount_path="/opt/airflow/dags"
+)
+
 # Security context to allow writing to emptyDir volumes
 SECURITY_CONTEXT = k8s.V1PodSecurityContext(
     fs_group=1000  # Allow user 1000 to write to emptyDir volumes
@@ -58,6 +69,32 @@ with DAG(
     catchup=False,
     tags=["cs9", "weather", "example"],
 ) as dag:
+
+    # git-sync init container to clone DAG repository
+    # Uses GITSYNC_* variables (not GIT_SYNC_*) for git-sync v4.x
+    git_sync_init = k8s.V1Container(
+        name="git-sync-init",
+        image="registry.k8s.io/git-sync/git-sync:v4.3.0",
+        image_pull_policy="IfNotPresent",
+        env=[
+            k8s.V1EnvVar(name="GITSYNC_ONE_TIME", value="true"),
+            k8s.V1EnvVar(name="GITSYNC_REPO", value="https://github.com/FHIDev/FHI.Fida.cs.git"),
+            k8s.V1EnvVar(name="GITSYNC_BRANCH", value="skybert-airflow-dags"),
+            k8s.V1EnvVar(name="GITSYNC_ROOT", value="/opt/airflow/dags"),
+            k8s.V1EnvVar(name="GITSYNC_DEST", value="repo"),
+            k8s.V1EnvVar(name="GITSYNC_DEPTH", value="1"),
+            k8s.V1EnvVar(name="GITSYNC_VERBOSE", value="1"),
+        ],
+        volume_mounts=[GIT_VOLUME_MOUNT],
+        security_context=k8s.V1SecurityContext(
+            run_as_user=65533,
+            run_as_group=65533
+        ),
+        resources=k8s.V1ResourceRequirements(
+            requests={"cpu": "10m", "memory": "32Mi"},
+            limits={"cpu": "100m", "memory": "128Mi"}
+        ),
+    )
 
     weather_download_and_import_rawdata = KubernetesPodOperator(
         task_id="weather_download_and_import_rawdata",
@@ -76,8 +113,9 @@ with DAG(
         service_account_name=TEAM_CONFIG["service_account_name"],
         is_delete_operator_pod=False,
         security_context=SECURITY_CONTEXT,
-        volumes=[WORK_VOLUME],
-        volume_mounts=[WORK_VOLUME_MOUNT],
+        volumes=[WORK_VOLUME, GIT_VOLUME],
+        volume_mounts=[WORK_VOLUME_MOUNT, GIT_VOLUME_MOUNT],
+        init_containers=[git_sync_init],
     )
 
     weather_clean_data = KubernetesPodOperator(
@@ -97,8 +135,9 @@ with DAG(
         service_account_name=TEAM_CONFIG["service_account_name"],
         is_delete_operator_pod=False,
         security_context=SECURITY_CONTEXT,
-        volumes=[WORK_VOLUME],
-        volume_mounts=[WORK_VOLUME_MOUNT],
+        volumes=[WORK_VOLUME, GIT_VOLUME],
+        volume_mounts=[WORK_VOLUME_MOUNT, GIT_VOLUME_MOUNT],
+        init_containers=[git_sync_init],
     )
 
     # Task dependencies
