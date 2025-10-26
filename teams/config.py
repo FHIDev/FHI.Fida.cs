@@ -16,7 +16,7 @@ service account permissions to create and manage pods.
 TEAM_CONFIG = {
     "norsyss": {
         "service_account_name": "airflow-worker-team-norsyss",
-        "namespace": "ns-cs9-test",
+        "namespace": "tn-fida-airflow",
         "description": "NorSySS team - running on cs9 infrastructure",
     },
     # Template for additional teams:
