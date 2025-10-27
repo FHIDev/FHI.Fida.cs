@@ -1,5 +1,8 @@
 FROM csids/cs9-su-csverse:4.4.1
 
+# Create python symlink for compatibility (python3 is installed, but some scripts expect python)
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
 # environmental variables
 COPY env_inside_image/env_inside_image.sh /tmp/
 RUN chmod 0777 /tmp/env_inside_image.sh
