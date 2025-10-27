@@ -10,8 +10,8 @@ TEAM_CONFIG = get_team_config(TEAM_NAME)
 
 # Default resource limits for all cs9 tasks (must not exceed Kyverno policy: CPU <= 2, Memory <= 2Gi)
 DEFAULT_CONTAINER_RESOURCES = k8s.V1ResourceRequirements(
-    requests={"cpu": "1", "memory": "2Gi"},
-    limits={"cpu": "1", "memory": "2Gi"}
+    requests={"cpu": "500m", "memory": "1Gi"},
+    limits={"cpu": "1000m", "memory": "1Gi"}
 )
 
 # Reusable environment variables for all cs9 tasks
