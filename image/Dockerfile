@@ -27,3 +27,7 @@ RUN pip install --upgrade pip && \
       --constraint https://raw.githubusercontent.com/apache/airflow/constraints-3.1.0/constraints-3.10.txt && \
     find /usr/local/lib/python3.10/dist-packages -type d -exec chmod 755 {} \; && \
     find /usr/local/lib/python3.10/dist-packages -type f -exec chmod 644 {} \;
+
+### Set AIRFLOW_HOME to /tmp/airflow for ephemeral worker pods
+### This allows any UID to import airflow without permission issues
+ENV AIRFLOW_HOME=/tmp/airflow
