@@ -21,6 +21,7 @@ RUN R -e 'devtools::install_github("norsyss/norsyss", upgrade="never")'
 RUN R -e 'devtools::install_github("csids/cs9example", upgrade="never")'
 
 ### install Airflow for Kubernetes execution (for Airflow 3.0+ compatibility)
+### Use official Airflow 3.1.0 constraints for known-good dependency versions
 RUN pip install --upgrade pip && \
-    pip uninstall -y structlog && \
-    pip install apache-airflow[kubernetes]
+    pip install apache-airflow[kubernetes]==3.1.0 \
+      --constraint https://raw.githubusercontent.com/apache/airflow/constraints-3.1.0/constraints-3.10.txt
