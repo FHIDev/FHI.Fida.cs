@@ -1,6 +1,6 @@
 from datetime import datetime
 from airflow import DAG
-from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
+from airflow.operators.bash import BashOperator
 from kubernetes.client import models as k8s
 from teams.config import get_team_config
 
@@ -34,11 +34,13 @@ CS9_ENV_VARS = {
 }
 
 # Writable work volume for CS9 script execution
-# KubernetesPodOperator does not inherit volumes from pod_template_file,
-# so volumes must be explicitly defined here
+# Uses a PVC shared across task pods to persist data between sequential tasks
+# Prerequisite: PVC "airflow-work-volume" must exist in the namespace
 WORK_VOLUME = k8s.V1Volume(
     name="work",
-    empty_dir=k8s.V1EmptyDirVolumeSource()
+    persistent_volume_claim=k8s.V1PersistentVolumeClaimVolumeSource(
+        claim_name="airflow-work-volume"
+    )
 )
 
 WORK_VOLUME_MOUNT = k8s.V1VolumeMount(
@@ -46,16 +48,30 @@ WORK_VOLUME_MOUNT = k8s.V1VolumeMount(
     mount_path="/work"
 )
 
-# Git volume for DAG bundle syncing (required for Airflow 3.0 SDK execution)
-GIT_VOLUME = k8s.V1Volume(
-    name="dags",
-    empty_dir=k8s.V1EmptyDirVolumeSource()
-)
-
-GIT_VOLUME_MOUNT = k8s.V1VolumeMount(
-    name="dags",
-    mount_path="/opt/airflow/dags"
-)
+# Pod executor config for Kubernetes Executor
+def get_executor_config():
+    return {
+        "pod_override": k8s.V1Pod(
+            spec=k8s.V1PodSpec(
+                containers=[
+                    k8s.V1Container(
+                        name="base",
+                        image="ghcr.io/fhidev/fhi.fida.cs/cs9base-k8s:latest",
+                        image_pull_policy="Always",
+                        resources=DEFAULT_CONTAINER_RESOURCES,
+                        volume_mounts=[WORK_VOLUME_MOUNT],
+                        env=[
+                            k8s.V1EnvVar(name=key, value=str(value))
+                            for key, value in CS9_ENV_VARS.items()
+                        ],
+                    )
+                ],
+                volumes=[WORK_VOLUME],
+                service_account_name=TEAM_CONFIG["service_account_name"],
+                restart_policy="Never",
+            )
+        )
+    }
 
 with DAG(
     dag_id="cs9example_weather_download",
@@ -65,73 +81,26 @@ with DAG(
     tags=["cs9", "weather", "example"],
 ) as dag:
 
-    # git-sync init container to clone DAG repository
-    # Uses GITSYNC_* variables for git-sync v4.x
-    # Note: --branch is deprecated in favor of --ref, and --dest in favor of --link
-    git_sync_init = k8s.V1Container(
-        name="git-sync-init",
-        image="registry.k8s.io/git-sync/git-sync:v4.3.0",
-        image_pull_policy="IfNotPresent",
-        env=[
-            k8s.V1EnvVar(name="GITSYNC_ONE_TIME", value="true"),
-            k8s.V1EnvVar(name="GITSYNC_REPO", value="https://github.com/FHIDev/FHI.Fida.cs.git"),
-            k8s.V1EnvVar(name="GITSYNC_REF", value="skybert-airflow-dags"),  # Replaces deprecated GITSYNC_BRANCH
-            k8s.V1EnvVar(name="GITSYNC_ROOT", value="/opt/airflow/dags"),
-            k8s.V1EnvVar(name="GITSYNC_LINK", value="repo"),  # Replaces deprecated GITSYNC_DEST
-            k8s.V1EnvVar(name="GITSYNC_DEPTH", value="1"),
-            k8s.V1EnvVar(name="GITSYNC_VERBOSE", value="1"),
-        ],
-        volume_mounts=[GIT_VOLUME_MOUNT],
-        security_context=k8s.V1SecurityContext(
-            run_as_user=65533,
-            run_as_group=65533
-        ),
-        resources=k8s.V1ResourceRequirements(
-            requests={"cpu": "10m", "memory": "32Mi"},
-            limits={"cpu": "100m", "memory": "128Mi"}
-        ),
-    )
-
-    weather_download_and_import_rawdata = KubernetesPodOperator(
+    weather_download_and_import_rawdata = BashOperator(
         task_id="weather_download_and_import_rawdata",
-        image="ghcr.io/fhidev/fhi.fida.cs/cs9base:latest",
-        image_pull_policy="Always",
-        cmds=["/usr/local/bin/install_ss_and_run_task_k8s.sh"],
-        arguments=[
-            "https://github.com/csids/cs9example.git",
-            "main",
-            "weather_download_and_import_rawdata"
-        ],
-        env_vars=CS9_ENV_VARS,
-        container_resources=DEFAULT_CONTAINER_RESOURCES,
-        name="cs9_weather_download_and_import_rawdata",
-        namespace=TEAM_CONFIG["namespace"],
-        service_account_name=TEAM_CONFIG["service_account_name"],
-        is_delete_operator_pod=False,
-        volumes=[WORK_VOLUME, GIT_VOLUME],
-        volume_mounts=[WORK_VOLUME_MOUNT, GIT_VOLUME_MOUNT],
-        init_containers=[git_sync_init],
+        bash_command="""
+            set -e
+            cd /work
+            git clone --depth 1 --branch main https://github.com/csids/cs9example.git
+            cd cs9example
+            /usr/local/bin/install_ss_and_run_task_k8s.sh https://github.com/csids/cs9example.git main weather_download_and_import_rawdata
+        """,
+        executor_config=get_executor_config(),
     )
 
-    weather_clean_data = KubernetesPodOperator(
+    weather_clean_data = BashOperator(
         task_id="weather_clean_data",
-        image="ghcr.io/fhidev/fhi.fida.cs/cs9base:latest",
-        image_pull_policy="Always",
-        cmds=["/usr/local/bin/install_ss_and_run_task_k8s.sh"],
-        arguments=[
-            "https://github.com/csids/cs9example.git",
-            "main",
-            "weather_clean_data"
-        ],
-        env_vars=CS9_ENV_VARS,
-        container_resources=DEFAULT_CONTAINER_RESOURCES,
-        name="cs9_weather_clean_data",
-        namespace=TEAM_CONFIG["namespace"],
-        service_account_name=TEAM_CONFIG["service_account_name"],
-        is_delete_operator_pod=False,
-        volumes=[WORK_VOLUME, GIT_VOLUME],
-        volume_mounts=[WORK_VOLUME_MOUNT, GIT_VOLUME_MOUNT],
-        init_containers=[git_sync_init],
+        bash_command="""
+            set -e
+            cd /work/cs9example
+            /usr/local/bin/install_ss_and_run_task_k8s.sh https://github.com/csids/cs9example.git main weather_clean_data
+        """,
+        executor_config=get_executor_config(),
     )
 
     # Task dependencies
