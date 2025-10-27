@@ -21,4 +21,4 @@ RUN R -e 'devtools::install_github("norsyss/norsyss", upgrade="never")'
 RUN R -e 'devtools::install_github("csids/cs9example", upgrade="never")'
 
 ### install Airflow for Kubernetes execution (for Airflow 3.0+ compatibility)
-RUN pip install apache-airflow[kubernetes]
+RUN pip install --upgrade structlog && pip install apache-airflow[kubernetes] --no-deps && pip install pydantic kubernetes
