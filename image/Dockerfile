@@ -24,4 +24,6 @@ RUN R -e 'devtools::install_github("csids/cs9example", upgrade="never")'
 ### Use official Airflow 3.1.0 constraints for known-good dependency versions
 RUN pip install --upgrade pip && \
     pip install apache-airflow[kubernetes]==3.1.0 \
-      --constraint https://raw.githubusercontent.com/apache/airflow/constraints-3.1.0/constraints-3.10.txt
+      --constraint https://raw.githubusercontent.com/apache/airflow/constraints-3.1.0/constraints-3.10.txt && \
+    find /usr/local/lib/python3.10/dist-packages -type d -exec chmod 755 {} \; && \
+    find /usr/local/lib/python3.10/dist-packages -type f -exec chmod 644 {} \;
