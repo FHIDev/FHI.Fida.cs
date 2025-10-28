@@ -14,11 +14,15 @@ TEAM_CONFIG = get_team_config(TEAM_NAME)
 
 # Default resource limits for all cs9 tasks (must not exceed Kyverno policy: CPU <= 2, Memory <= 2Gi)
 def _get_default_container_resources():
-    k8s = _get_kubernetes_models()
-    return k8s.V1ResourceRequirements(
-        requests={"cpu": "500m", "memory": "1Gi"},
-        limits={"cpu": "1000m", "memory": "1Gi"}
-    )
+    try:
+        k8s = _get_kubernetes_models()
+        return k8s.V1ResourceRequirements(
+            requests={"cpu": "500m", "memory": "1Gi"},
+            limits={"cpu": "1000m", "memory": "1Gi"}
+        )
+    except ModuleNotFoundError:
+        # Worker pods don't have kubernetes; return None
+        return None
 
 # Reusable environment variables for all cs9 tasks
 # Database credentials point to norsyss_test database on airflow-cs9-test.postgres.database.azure.com
@@ -43,24 +47,48 @@ CS9_ENV_VARS = {
 # Uses a PVC shared across task pods to persist data between sequential tasks
 # Prerequisite: PVC "airflow-work-volume" must exist in the namespace
 def _get_work_volume():
-    k8s = _get_kubernetes_models()
-    return k8s.V1Volume(
-        name="work",
-        persistent_volume_claim=k8s.V1PersistentVolumeClaimVolumeSource(
-            claim_name="airflow-work-volume"
+    try:
+        k8s = _get_kubernetes_models()
+        return k8s.V1Volume(
+            name="work",
+            persistent_volume_claim=k8s.V1PersistentVolumeClaimVolumeSource(
+                claim_name="airflow-work-volume"
+            )
         )
-    )
+    except ModuleNotFoundError:
+        return None
 
 def _get_work_volume_mount():
-    k8s = _get_kubernetes_models()
-    return k8s.V1VolumeMount(
-        name="work",
-        mount_path="/work"
-    )
+    try:
+        k8s = _get_kubernetes_models()
+        return k8s.V1VolumeMount(
+            name="work",
+            mount_path="/work"
+        )
+    except ModuleNotFoundError:
+        return None
 
 # Pod executor config for Kubernetes Executor
 def get_executor_config():
-    k8s = _get_kubernetes_models()
+    """
+    Get pod override config for tasks running on Kubernetes Executor.
+    This function is only called by the scheduler, not by worker pods during DAG parsing.
+    Worker pods that import this DAG for ExecuteTask won't call this function.
+    """
+    try:
+        k8s = _get_kubernetes_models()
+    except ModuleNotFoundError:
+        # Worker pods don't have kubernetes module; return empty config
+        # Scheduler will have already sent executor config via ExecuteTask API
+        return {}
+
+    # Build volume_mounts and volumes lists, filtering out None values
+    volume_mount = _get_work_volume_mount()
+    volume_mounts = [volume_mount] if volume_mount is not None else []
+
+    volume = _get_work_volume()
+    volumes = [volume] if volume is not None else []
+
     return {
         "pod_override": k8s.V1Pod(
             spec=k8s.V1PodSpec(
@@ -74,14 +102,14 @@ def get_executor_config():
                         image="ghcr.io/fhidev/fhi.fida.cs/cs9base-k8s:latest",
                         image_pull_policy="Always",
                         resources=_get_default_container_resources(),
-                        volume_mounts=[_get_work_volume_mount()],
+                        volume_mounts=volume_mounts,
                         env=[
                             k8s.V1EnvVar(name=key, value=str(value))
                             for key, value in CS9_ENV_VARS.items()
                         ],
                     )
                 ],
-                volumes=[_get_work_volume()],
+                volumes=volumes,
                 service_account_name=TEAM_CONFIG["service_account_name"],
                 restart_policy="Never",
             )
