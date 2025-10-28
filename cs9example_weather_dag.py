@@ -53,6 +53,10 @@ def get_executor_config():
     return {
         "pod_override": k8s.V1Pod(
             spec=k8s.V1PodSpec(
+                security_context=k8s.V1PodSecurityContext(
+                    run_as_user=50000,
+                    fs_group=50000
+                ),
                 containers=[
                     k8s.V1Container(
                         name="base",
