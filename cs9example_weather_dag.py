@@ -1,18 +1,24 @@
 from datetime import datetime
 from airflow import DAG
-from airflow.operators.bash import BashOperator
-from kubernetes.client import models as k8s
+from airflow.providers.standard.operators.bash import BashOperator
 from teams.config import get_team_config
+
+# Lazy import kubernetes only when needed (avoids import error in task pods)
+def _get_kubernetes_models():
+    from kubernetes.client import models as k8s
+    return k8s
 
 # Team configuration: This DAG belongs to the norsyss team
 TEAM_NAME = "norsyss"
 TEAM_CONFIG = get_team_config(TEAM_NAME)
 
 # Default resource limits for all cs9 tasks (must not exceed Kyverno policy: CPU <= 2, Memory <= 2Gi)
-DEFAULT_CONTAINER_RESOURCES = k8s.V1ResourceRequirements(
-    requests={"cpu": "500m", "memory": "1Gi"},
-    limits={"cpu": "1000m", "memory": "1Gi"}
-)
+def _get_default_container_resources():
+    k8s = _get_kubernetes_models()
+    return k8s.V1ResourceRequirements(
+        requests={"cpu": "500m", "memory": "1Gi"},
+        limits={"cpu": "1000m", "memory": "1Gi"}
+    )
 
 # Reusable environment variables for all cs9 tasks
 # Database credentials point to norsyss_test database on airflow-cs9-test.postgres.database.azure.com
@@ -36,20 +42,25 @@ CS9_ENV_VARS = {
 # Writable work volume for CS9 script execution
 # Uses a PVC shared across task pods to persist data between sequential tasks
 # Prerequisite: PVC "airflow-work-volume" must exist in the namespace
-WORK_VOLUME = k8s.V1Volume(
-    name="work",
-    persistent_volume_claim=k8s.V1PersistentVolumeClaimVolumeSource(
-        claim_name="airflow-work-volume"
+def _get_work_volume():
+    k8s = _get_kubernetes_models()
+    return k8s.V1Volume(
+        name="work",
+        persistent_volume_claim=k8s.V1PersistentVolumeClaimVolumeSource(
+            claim_name="airflow-work-volume"
+        )
     )
-)
 
-WORK_VOLUME_MOUNT = k8s.V1VolumeMount(
-    name="work",
-    mount_path="/work"
-)
+def _get_work_volume_mount():
+    k8s = _get_kubernetes_models()
+    return k8s.V1VolumeMount(
+        name="work",
+        mount_path="/work"
+    )
 
 # Pod executor config for Kubernetes Executor
 def get_executor_config():
+    k8s = _get_kubernetes_models()
     return {
         "pod_override": k8s.V1Pod(
             spec=k8s.V1PodSpec(
@@ -62,15 +73,15 @@ def get_executor_config():
                         name="base",
                         image="ghcr.io/fhidev/fhi.fida.cs/cs9base-k8s:latest",
                         image_pull_policy="Always",
-                        resources=DEFAULT_CONTAINER_RESOURCES,
-                        volume_mounts=[WORK_VOLUME_MOUNT],
+                        resources=_get_default_container_resources(),
+                        volume_mounts=[_get_work_volume_mount()],
                         env=[
                             k8s.V1EnvVar(name=key, value=str(value))
                             for key, value in CS9_ENV_VARS.items()
                         ],
                     )
                 ],
-                volumes=[WORK_VOLUME],
+                volumes=[_get_work_volume()],
                 service_account_name=TEAM_CONFIG["service_account_name"],
                 restart_policy="Never",
             )
