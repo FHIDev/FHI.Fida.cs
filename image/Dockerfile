@@ -3,6 +3,13 @@ FROM csids/cs9-su-csverse:4.4.1
 # Create python symlink for compatibility (python3 is installed, but some scripts expect python)
 RUN ln -s /usr/bin/python3 /usr/bin/python
 
+# Create non-root 'airflow' user with UID 50000 and GID 50000
+# Required for Kubernetes Pod Security Standards compliance and principle of least privilege
+ARG AIRFLOW_UID=50000
+ARG AIRFLOW_GID=50000
+RUN groupadd -r -g ${AIRFLOW_GID} airflow && \
+    useradd -r -u ${AIRFLOW_UID} -g ${AIRFLOW_GID} -s /bin/bash -m airflow
+
 # environmental variables
 COPY env_inside_image/env_inside_image.sh /tmp/
 RUN chmod 0777 /tmp/env_inside_image.sh
@@ -31,3 +38,13 @@ RUN pip install --upgrade pip && \
 ### Set AIRFLOW_HOME to /tmp/airflow for ephemeral worker pods
 ### This allows any UID to import airflow without permission issues
 ENV AIRFLOW_HOME=/tmp/airflow
+
+# Ensure airflow user owns necessary directories and can write to them
+RUN mkdir -p /tmp/airflow && \
+    chown -R airflow:airflow /tmp/airflow && \
+    chmod -R 750 /tmp/airflow && \
+    chown -R airflow:airflow /opt/airflow 2>/dev/null || true && \
+    chmod -R 750 /opt/airflow 2>/dev/null || true
+
+# Switch to non-root airflow user for all subsequent operations
+USER airflow
