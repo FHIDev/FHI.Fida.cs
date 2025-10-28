@@ -26,54 +26,38 @@ def _get_default_container_resources():
 
 # Reusable environment variables for all cs9 tasks
 # Database credentials point to norsyss_test database on airflow-cs9-test.postgres.database.azure.com
-CS9_ENV_VARS = {
-    "CS9_DBCONFIG_USER": "norsyss_user",
-    "CS9_DBCONFIG_PASSWORD": "NorsyssTestPass!23#Secure",
-    "CS9_AUTO": "0",
-    "CS9_PATH": "/work",
-    "CS9_DBCONFIG_ACCESS": "config/anon",
-    "CS9_DBCONFIG_DRIVER": "PostgreSQL Unicode",
-    "CS9_DBCONFIG_PORT": "5432",
-    "CS9_DBCONFIG_SSLMODE": "no",
-    "CS9_DBCONFIG_ROLE_CREATE_TABLE": "norsyss_user",
-    "CS9_DBCONFIG_SERVER": "airflow-cs9-test.postgres.database.azure.com",
-    "CS9_DBCONFIG_SCHEMA_CONFIG": "public",
-    "CS9_DBCONFIG_DB_CONFIG": "norsyss_test",
-    "CS9_DBCONFIG_SCHEMA_ANON": "public",
-    "CS9_DBCONFIG_DB_ANON": "norsyss_test"
-}
-
-# Writable work volume for CS9 script execution
-# Uses a PVC shared across task pods to persist data between sequential tasks
-# Prerequisite: PVC "airflow-work-volume" must exist in the namespace
-def _get_work_volume():
-    try:
-        k8s = _get_kubernetes_models()
-        return k8s.V1Volume(
-            name="work",
-            persistent_volume_claim=k8s.V1PersistentVolumeClaimVolumeSource(
-                claim_name="airflow-work-volume"
-            )
-        )
-    except ModuleNotFoundError:
-        return None
-
-def _get_work_volume_mount():
-    try:
-        k8s = _get_kubernetes_models()
-        return k8s.V1VolumeMount(
-            name="work",
-            mount_path="/work"
-        )
-    except ModuleNotFoundError:
-        return None
+# Note: CS9_PATH will be set dynamically per task to use ephemeral /tmp/work_{run_id}
+def _get_cs9_env_vars(work_dir="/tmp/work"):
+    return {
+        "CS9_DBCONFIG_USER": "norsyss_user",
+        "CS9_DBCONFIG_PASSWORD": "NorsyssTestPass!23#Secure",
+        "CS9_AUTO": "0",
+        "CS9_PATH": work_dir,
+        "CS9_DBCONFIG_ACCESS": "config/anon",
+        "CS9_DBCONFIG_DRIVER": "PostgreSQL Unicode",
+        "CS9_DBCONFIG_PORT": "5432",
+        "CS9_DBCONFIG_SSLMODE": "no",
+        "CS9_DBCONFIG_ROLE_CREATE_TABLE": "norsyss_user",
+        "CS9_DBCONFIG_SERVER": "airflow-cs9-test.postgres.database.azure.com",
+        "CS9_DBCONFIG_SCHEMA_CONFIG": "public",
+        "CS9_DBCONFIG_DB_CONFIG": "norsyss_test",
+        "CS9_DBCONFIG_SCHEMA_ANON": "public",
+        "CS9_DBCONFIG_DB_ANON": "norsyss_test"
+    }
 
 # Pod executor config for Kubernetes Executor
-def get_executor_config():
+# Uses ephemeral /tmp storage with run_id isolation for each DAG run
+def get_executor_config(work_dir="/tmp/work"):
     """
     Get pod override config for tasks running on Kubernetes Executor.
     This function is only called by the scheduler, not by worker pods during DAG parsing.
     Worker pods that import this DAG for ExecuteTask won't call this function.
+
+    Ephemeral storage pattern:
+    - Each task pod gets its own /tmp ephemeral storage
+    - Tasks in same DAG run use run_id in path for isolation
+    - Concurrent DAG runs don't interfere (different run_ids)
+    - Storage is automatically cleaned when pod terminates
     """
     try:
         k8s = _get_kubernetes_models()
@@ -81,13 +65,6 @@ def get_executor_config():
         # Worker pods don't have kubernetes module; return empty config
         # Scheduler will have already sent executor config via ExecuteTask API
         return {}
-
-    # Build volume_mounts and volumes lists, filtering out None values
-    volume_mount = _get_work_volume_mount()
-    volume_mounts = [volume_mount] if volume_mount is not None else []
-
-    volume = _get_work_volume()
-    volumes = [volume] if volume is not None else []
 
     return {
         "pod_override": k8s.V1Pod(
@@ -102,14 +79,12 @@ def get_executor_config():
                         image="ghcr.io/fhidev/fhi.fida.cs/cs9base-k8s:latest",
                         image_pull_policy="Always",
                         resources=_get_default_container_resources(),
-                        volume_mounts=volume_mounts,
                         env=[
                             k8s.V1EnvVar(name=key, value=str(value))
-                            for key, value in CS9_ENV_VARS.items()
+                            for key, value in _get_cs9_env_vars(work_dir).items()
                         ],
                     )
                 ],
-                volumes=volumes,
                 service_account_name=TEAM_CONFIG["service_account_name"],
                 restart_policy="Never",
             )
@@ -128,23 +103,42 @@ with DAG(
         task_id="weather_download_and_import_rawdata",
         bash_command="""
             set -e
-            cd /work
+            WORK_DIR="/tmp/work_{{ run_id }}"
+            mkdir -p "${WORK_DIR}"
+            cd "${WORK_DIR}"
+            # Clean up any existing cs9example directory to ensure fresh clone
+            rm -rf cs9example
             git clone --depth 1 --branch main https://github.com/csids/cs9example.git
             cd cs9example
             /usr/local/bin/install_ss_and_run_task_k8s.sh https://github.com/csids/cs9example.git main weather_download_and_import_rawdata
+            # Store working directory path in XCom for downstream tasks
+            echo "${WORK_DIR}"
         """,
-        executor_config=get_executor_config(),
+        executor_config=get_executor_config(work_dir="/tmp/work_{{ run_id }}"),
+        do_xcom_push=True,
     )
 
     weather_clean_data = BashOperator(
         task_id="weather_clean_data",
         bash_command="""
             set -e
-            cd /work/cs9example
+            # Retrieve working directory from upstream task via XCom
+            # Note: Each task gets its own pod, so we clone cs9example again in this pod
+            WORK_DIR="/tmp/work_{{ run_id }}"
+            mkdir -p "${WORK_DIR}"
+            cd "${WORK_DIR}"
+            # Clone repository fresh in this task pod
+            # (Each KubernetesExecutor task pod is ephemeral and isolated)
+            if [ ! -d cs9example ]; then
+                git clone --depth 1 --branch main https://github.com/csids/cs9example.git
+            fi
+            cd cs9example
             /usr/local/bin/install_ss_and_run_task_k8s.sh https://github.com/csids/cs9example.git main weather_clean_data
         """,
-        executor_config=get_executor_config(),
+        executor_config=get_executor_config(work_dir="/tmp/work_{{ run_id }}"),
     )
 
     # Task dependencies
+    # weather_clean_data depends on weather_download_and_import_rawdata
+    # XCom allows it to retrieve metadata if needed (via ti.xcom_pull())
     weather_download_and_import_rawdata >> weather_clean_data
