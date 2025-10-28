@@ -76,7 +76,7 @@ def get_executor_config():
 with DAG(
     dag_id="cs9example_weather_download",
     start_date=datetime(2024, 1, 1),
-    schedule="0 * * * *",
+    schedule=None,  # Changed from "0 * * * *" to None for manual triggers only
     catchup=False,
     tags=["cs9", "weather", "example"],
 ) as dag:
