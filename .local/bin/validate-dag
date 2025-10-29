@@ -1,0 +1,51 @@
+#!/bin/bash
+set -e
+
+# Validate DAG using the exact Airflow image from the cluster (3.1.0)
+
+if [ -z "$1" ]; then
+    echo "Usage: $0 <path-to-dag-repo>"
+    echo "Example: $0 /home/user/dag-repo"
+    exit 1
+fi
+
+DAG_REPO_PATH="$1"
+
+if [ ! -d "$DAG_REPO_PATH" ]; then
+    echo "Error: Directory not found: $DAG_REPO_PATH"
+    exit 1
+fi
+
+if [ ! -f "$DAG_REPO_PATH/cs9example_weather_dag.py" ]; then
+    echo "Error: cs9example_weather_dag.py not found in $DAG_REPO_PATH"
+    exit 1
+fi
+
+echo "Validating DAG in $DAG_REPO_PATH"
+echo "Using Airflow image: apache/airflow:3.1.0"
+echo ""
+
+docker run --rm \
+    --entrypoint python3 \
+    -v "$DAG_REPO_PATH:/dag-repo" \
+    -w /dag-repo \
+    apache/airflow:3.1.0 \
+    -c "
+import sys
+sys.path.insert(0, '/dag-repo')
+try:
+    import cs9example_weather_dag
+    print('✓ DAG parsed successfully')
+    dag = cs9example_weather_dag.dag
+    print(f'  - DAG ID: {dag.dag_id}')
+    print(f'  - Tasks: {[t.task_id for t in dag.tasks]}')
+    print(f'  - Schedule: {dag.schedule}')
+except Exception as e:
+    print(f'✗ DAG error: {e}')
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
+"
+
+echo ""
+echo "✓ Validation passed"
