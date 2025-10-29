@@ -1,16 +1,9 @@
 from datetime import datetime
 from airflow import DAG
 from airflow.providers.standard.operators.bash import BashOperator
-from kubernetes.client import models as k8s
 
 # Service account for this DAG
 SERVICE_ACCOUNT_NAME = "airflow-worker-team-norsyss"
-
-# Resource requirements for all cs9 tasks (must not exceed Kyverno policy: CPU <= 2, Memory <= 2Gi)
-CS9_CONTAINER_RESOURCES = k8s.V1ResourceRequirements(
-    requests={"cpu": "500m", "memory": "1Gi"},
-    limits={"cpu": "1000m", "memory": "1Gi"}
-)
 
 # Environment variables for cs9 tasks
 # All variables are set here; tasks will access them via shell environment and pass to R via Sys.setenv()
@@ -31,32 +24,53 @@ CS9_ENV_VARS = {
     "CS9_DBCONFIG_DB_ANON": "norsyss_test"
 }
 
-def get_executor_config():
-    """Pod override config for Kubernetes Executor tasks."""
-    return {
-        "pod_override": k8s.V1Pod(
-            spec=k8s.V1PodSpec(
-                security_context=k8s.V1PodSecurityContext(
-                    run_as_user=50000,
-                    fs_group=50000
-                ),
-                containers=[
-                    k8s.V1Container(
-                        name="base",
-                        image="ghcr.io/fhidev/fhi.fida.cs/cs9base-k8s:latest",
-                        image_pull_policy="Always",
-                        resources=CS9_CONTAINER_RESOURCES,
-                        env=[
-                            k8s.V1EnvVar(name=key, value=str(value))
-                            for key, value in CS9_ENV_VARS.items()
-                        ],
-                    )
-                ],
-                service_account_name=SERVICE_ACCOUNT_NAME,
-                restart_policy="Never",
+# Try to import kubernetes client. This is needed in the scheduler to construct executor configs,
+# but worker pods (which execute tasks) don't have the kubernetes library installed.
+# The try/except allows the DAG to be imported in both contexts.
+try:
+    from kubernetes.client import models as k8s
+
+    # Resource requirements for all cs9 tasks (must not exceed Kyverno policy: CPU <= 2, Memory <= 2Gi)
+    CS9_CONTAINER_RESOURCES = k8s.V1ResourceRequirements(
+        requests={"cpu": "500m", "memory": "1Gi"},
+        limits={"cpu": "1000m", "memory": "1Gi"}
+    )
+
+    def get_executor_config():
+        """Pod override config for Kubernetes Executor tasks."""
+        return {
+            "pod_override": k8s.V1Pod(
+                spec=k8s.V1PodSpec(
+                    security_context=k8s.V1PodSecurityContext(
+                        run_as_user=50000,
+                        fs_group=50000
+                    ),
+                    containers=[
+                        k8s.V1Container(
+                            name="base",
+                            image="ghcr.io/fhidev/fhi.fida.cs/cs9base-k8s:latest",
+                            image_pull_policy="Always",
+                            resources=CS9_CONTAINER_RESOURCES,
+                            env=[
+                                k8s.V1EnvVar(name=key, value=str(value))
+                                for key, value in CS9_ENV_VARS.items()
+                            ],
+                        )
+                    ],
+                    service_account_name=SERVICE_ACCOUNT_NAME,
+                    restart_policy="Never",
+                )
             )
-        )
-    }
+        }
+
+except ModuleNotFoundError:
+    # Kubernetes client not available (e.g., in worker pods).
+    # Provide dummy implementations to allow DAG import to succeed.
+    CS9_CONTAINER_RESOURCES = None
+
+    def get_executor_config():
+        """Dummy implementation when kubernetes client is not available."""
+        return {}
 
 with DAG(
     dag_id="cs9example_weather_download",
