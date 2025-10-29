@@ -4,7 +4,7 @@ from airflow.providers.standard.operators.bash import BashOperator
 from kubernetes.client import models as k8s
 
 # Service account for this DAG
-SERVICE_ACCOUNT_NAME = "norsyss"
+SERVICE_ACCOUNT_NAME = "airflow-worker-team-norsyss"
 
 # Resource requirements for all cs9 tasks (must not exceed Kyverno policy: CPU <= 2, Memory <= 2Gi)
 CS9_CONTAINER_RESOURCES = k8s.V1ResourceRequirements(
