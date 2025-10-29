@@ -111,19 +111,15 @@ with DAG(
             git clone --depth 1 --branch main https://github.com/csids/cs9example.git
             cd cs9example
             /usr/local/bin/install_ss_and_run_task_k8s.sh https://github.com/csids/cs9example.git main weather_download_and_import_rawdata
-            # Store working directory path in XCom for downstream tasks
-            echo "${WORK_DIR}"
         """,
-        executor_config=get_executor_config(work_dir="/tmp/work_{{ run_id }}"),
-        do_xcom_push=True,
+        executor_config=get_executor_config(),
     )
 
     weather_clean_data = BashOperator(
         task_id="weather_clean_data",
         bash_command="""
             set -e
-            # Retrieve working directory from upstream task via XCom
-            # Note: Each task gets its own pod, so we clone cs9example again in this pod
+            # Each task gets its own pod, so we clone cs9example again in this pod
             WORK_DIR="/tmp/work_{{ run_id }}"
             mkdir -p "${WORK_DIR}"
             cd "${WORK_DIR}"
@@ -135,10 +131,8 @@ with DAG(
             cd cs9example
             /usr/local/bin/install_ss_and_run_task_k8s.sh https://github.com/csids/cs9example.git main weather_clean_data
         """,
-        executor_config=get_executor_config(work_dir="/tmp/work_{{ run_id }}"),
+        executor_config=get_executor_config(),
     )
 
-    # Task dependencies
-    # weather_clean_data depends on weather_download_and_import_rawdata
-    # XCom allows it to retrieve metadata if needed (via ti.xcom_pull())
+    # Task dependency: weather_clean_data runs after weather_download_and_import_rawdata completes
     weather_download_and_import_rawdata >> weather_clean_data
