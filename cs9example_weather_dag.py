@@ -103,11 +103,14 @@ with DAG(
         task_id="weather_download_and_import_rawdata",
         bash_command="""
             set -e
-            echo "=== Environment Variables ==="
-            env | grep -i CS9 | sort
-            echo "=== Testing database connectivity ==="
-            which psql || echo "psql not found"
-            echo "Done - debug complete"
+            WORK_DIR="/tmp/work_{{ run_id }}"
+            mkdir -p "${WORK_DIR}"
+            cd "${WORK_DIR}"
+            # Clean up any existing cs9example directory to ensure fresh clone
+            rm -rf cs9example
+            git clone --depth 1 --branch main https://github.com/csids/cs9example.git
+            cd cs9example
+            /usr/local/bin/install_ss_and_run_task_k8s.sh https://github.com/csids/cs9example.git main weather_download_and_import_rawdata
         """,
         executor_config=get_executor_config(),
     )
