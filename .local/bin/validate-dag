@@ -3,13 +3,14 @@ set -e
 
 # Validate DAG using the exact Airflow image from the cluster (3.1.0)
 
-if [ -z "$1" ]; then
-    echo "Usage: $0 <path-to-dag-repo>"
-    echo "Example: $0 /home/user/dag-repo"
+DAG_REPO_PATH="${1:-$(git rev-parse --show-toplevel)}"
+
+if [ -z "$DAG_REPO_PATH" ]; then
+    echo "Error: Could not determine DAG repo path"
+    echo "Usage: $0 [path-to-dag-repo]"
+    echo "If no path provided, defaults to git repository root"
     exit 1
 fi
-
-DAG_REPO_PATH="$1"
 
 if [ ! -d "$DAG_REPO_PATH" ]; then
     echo "Error: Directory not found: $DAG_REPO_PATH"
