@@ -80,6 +80,53 @@ with DAG(
     tags=["cs9", "weather", "example"],
 ) as dag:
 
+    debug_postgres_connection = BashOperator(
+        task_id="debug_postgres_connection",
+        bash_command="""
+            set -e
+            echo "=== Testing PostgreSQL connectivity from bash ==="
+            echo "Host: ${CS9_DBCONFIG_SERVER}"
+            echo "User: ${CS9_DBCONFIG_USER}"
+            echo "Database: ${CS9_DBCONFIG_DB_CONFIG}"
+
+            PGPASSWORD="${CS9_DBCONFIG_PASSWORD}" psql \
+              -h "${CS9_DBCONFIG_SERVER}" \
+              -U "${CS9_DBCONFIG_USER}" \
+              -d "${CS9_DBCONFIG_DB_CONFIG}" \
+              -c "SELECT 1 as connection_test;" || echo "Bash psql test failed"
+
+            echo ""
+            echo "=== Testing PostgreSQL connectivity from R ==="
+            R -q -e "
+            cat('Testing R database connection\n')
+            cat('Host: ', Sys.getenv('CS9_DBCONFIG_SERVER'), '\n')
+            cat('User: ', Sys.getenv('CS9_DBCONFIG_USER'), '\n')
+            cat('Database: ', Sys.getenv('CS9_DBCONFIG_DB_CONFIG'), '\n')
+
+            tryCatch({
+              library(DBI)
+              conn <- dbConnect(
+                RPostgres::Postgres(),
+                host = Sys.getenv('CS9_DBCONFIG_SERVER'),
+                user = Sys.getenv('CS9_DBCONFIG_USER'),
+                password = Sys.getenv('CS9_DBCONFIG_PASSWORD'),
+                dbname = Sys.getenv('CS9_DBCONFIG_DB_CONFIG'),
+                port = as.numeric(Sys.getenv('CS9_DBCONFIG_PORT')),
+                sslmode = Sys.getenv('CS9_DBCONFIG_SSLMODE')
+              )
+              result <- dbGetQuery(conn, 'SELECT 1 as connection_test')
+              cat('R database connection successful:\n')
+              print(result)
+              dbDisconnect(conn)
+            }, error = function(e) {
+              cat('R database connection failed:\n')
+              cat(e[['message']], '\n')
+            })
+            "
+        """,
+        executor_config=get_executor_config(),
+    )
+
     weather_download_and_import_rawdata = BashOperator(
         task_id="weather_download_and_import_rawdata",
         bash_command="/usr/local/bin/install_ss_and_run_task_k8s.sh https://github.com/csids/cs9example.git main weather_download_and_import_rawdata",
@@ -92,5 +139,5 @@ with DAG(
         executor_config=get_executor_config(),
     )
 
-    # Task dependency: weather_clean_data runs after weather_download_and_import_rawdata completes
-    weather_download_and_import_rawdata >> weather_clean_data
+    # Task dependencies
+    debug_postgres_connection >> weather_download_and_import_rawdata >> weather_clean_data
