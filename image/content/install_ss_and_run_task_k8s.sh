@@ -15,8 +15,15 @@ TASK=$3
 # Extract repository name from URL (remove .git suffix and get basename)
 REPOSITORY=$(basename "$REPO_URL" .git)
 
+# Use writable work directory (defaults to /work mounted as emptyDir in Kubernetes)
+WORK_DIR="${CS9_PATH:-/work}"
+if [ ! -d "$WORK_DIR" ]; then
+  echo "Work directory $WORK_DIR does not exist. Creating it."
+  mkdir -p "$WORK_DIR"
+fi
+
 # Clone the repository and checkout the specified branch
-git -C / clone -b "$BRANCH" "$REPO_URL"
+git -C "$WORK_DIR" clone -b "$BRANCH" "$REPO_URL"
 
 # Check if the cloning was successful
 if [ $? -ne 0 ]; then
@@ -24,24 +31,28 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Build the R package
-R CMD build "/${REPOSITORY}"
+# Build the R package from the work directory (R CMD build outputs tarball to current dir)
+cd "$WORK_DIR"
+R CMD build "$REPOSITORY"
 
 # Check if the build was successful
 if [ $? -ne 0 ]; then
-  echo "Failed to build the R package from /${REPOSITORY}"
+  echo "Failed to build the R package from ${WORK_DIR}/${REPOSITORY}"
   exit 1
 fi
 
-# Find the most recent tarball in the / directory
-TARBALL=$(ls -t /${REPOSITORY}_*.tar.gz | head -n 1)
+# Find the most recent tarball in the work directory
+TARBALL=$(ls -t "${REPOSITORY}"_*.tar.gz | head -n 1)
 
 if [ -z "$TARBALL" ]; then
-  echo "No tarball found for ${REPOSITORY} in /"
+  echo "No tarball found for ${REPOSITORY} in ${WORK_DIR}"
   exit 1
 fi
 
-# Install the R package
+# Install the R package to a user-writable library (use work directory for R user library)
+# This avoids permission issues when running as non-root user in containers
+export R_LIBS_USER="$WORK_DIR/R_library"
+mkdir -p "$R_LIBS_USER"
 Rscript -e "install.packages('$TARBALL', repos = NULL, type = 'source')"
 
 # Check if the installation was successful
@@ -50,17 +61,10 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Set CS9 environment variables in R from Kubernetes environment
-ENV_COMMAND=""
-for var in CS9_DBCONFIG_USER CS9_DBCONFIG_PASSWORD CS9_AUTO CS9_PATH CS9_DBCONFIG_ACCESS CS9_DBCONFIG_DRIVER CS9_DBCONFIG_PORT CS9_DBCONFIG_SSLMODE CS9_DBCONFIG_ROLE_CREATE_TABLE CS9_DBCONFIG_SERVER CS9_DBCONFIG_SCHEMA_CONFIG CS9_DBCONFIG_DB_CONFIG CS9_DBCONFIG_SCHEMA_ANON CS9_DBCONFIG_DB_ANON; do
-  if [ ! -z "${!var}" ]; then
-    escaped_value="${!var//\"/\\\"}"
-    ENV_COMMAND="${ENV_COMMAND}Sys.setenv(${var}=\"${escaped_value}\"); "
-  fi
-done
-
-# Run the specified R command with environment variables
-Rscript -e "${ENV_COMMAND}${REPOSITORY}::global\$ss\$run_task('${TASK}')"
+# Run the specified R command
+# CS9 environment variables are inherited from the container environment (set by Kubernetes)
+# and are automatically available to R via Sys.getenv()
+Rscript -e "${REPOSITORY}::global\$ss\$run_task('${TASK}')"
 
 # Check if the R command execution was successful
 if [ $? -ne 0 ]; then
