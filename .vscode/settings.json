@@ -1,0 +1,9 @@
+{
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff"
+    },
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "ruff.configuration": "${workspaceFolder}/ruff.toml",
+    "python.languageServer": "None"
+}
