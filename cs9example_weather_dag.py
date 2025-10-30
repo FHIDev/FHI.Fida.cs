@@ -76,7 +76,7 @@ except ModuleNotFoundError:
 with DAG(
     dag_id="cs9example_weather_download",
     start_date=datetime(2024, 1, 1),
-    schedule=None,  # Changed from "0 * * * *" to None for manual triggers only
+    schedule="0 * * * *",
     catchup=False,
     tags=["cs9", "weather", "example"],
 ) as dag:
