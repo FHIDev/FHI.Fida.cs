@@ -22,6 +22,9 @@ RUN R -e 'devtools::install_github("norsyss/norsyss", upgrade="never")'
 ### install surveillance systems
 RUN R -e 'devtools::install_github("csids/cs9example", upgrade="never")'
 
+### install RPostgres for PostgreSQL connectivity from R
+RUN R -e 'install.packages("RPostgres", repos="https://cran.r-project.org")'
+
 ### install Airflow for Kubernetes execution (for Airflow 3.0+ compatibility)
 ### Use official Airflow 3.1.0 constraints for known-good dependency versions
 RUN pip install --upgrade pip && \
