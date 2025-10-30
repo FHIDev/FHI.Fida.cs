@@ -10,11 +10,6 @@ ARG AIRFLOW_GID=50000
 RUN groupadd -r -g ${AIRFLOW_GID} airflow && \
     useradd -r -u ${AIRFLOW_UID} -g ${AIRFLOW_GID} -s /bin/bash -m airflow
 
-# environmental variables
-COPY env_inside_image/env_inside_image.sh /tmp/
-RUN chmod 0777 /tmp/env_inside_image.sh
-RUN bash /tmp/env_inside_image.sh
-
 # Copy config and startup
 COPY content/install_ss_and_run_task.sh /usr/local/bin/install_ss_and_run_task.sh
 COPY content/install_ss_and_run_task_k8s.sh /usr/local/bin/install_ss_and_run_task_k8s.sh
