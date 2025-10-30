@@ -15,7 +15,7 @@ CS9_ENV_VARS = {
     "CS9_DBCONFIG_ACCESS": "config/anon",
     "CS9_DBCONFIG_DRIVER": "PostgreSQL Unicode",
     "CS9_DBCONFIG_PORT": "5432",
-    "CS9_DBCONFIG_SSLMODE": "no",
+    "CS9_DBCONFIG_SSLMODE": "disable",
     "CS9_DBCONFIG_ROLE_CREATE_TABLE": "norsyss_user",
     "CS9_DBCONFIG_SERVER": "airflow-cs9-test.postgres.database.azure.com",
     "CS9_DBCONFIG_SCHEMA_CONFIG": "public",
