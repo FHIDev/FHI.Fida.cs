@@ -82,27 +82,13 @@ with DAG(
 
     weather_download_and_import_rawdata = BashOperator(
         task_id="weather_download_and_import_rawdata",
-        bash_command="""
-            set -e
-            mkdir -p "${CS9_PATH}"
-            cd "${CS9_PATH}"
-            git clone --depth 1 --branch main https://github.com/csids/cs9example.git
-            cd cs9example
-            /usr/local/bin/install_ss_and_run_task_k8s.sh https://github.com/csids/cs9example.git main weather_download_and_import_rawdata
-        """,
+        bash_command="/usr/local/bin/install_ss_and_run_task_k8s.sh https://github.com/csids/cs9example.git main weather_download_and_import_rawdata",
         executor_config=get_executor_config(),
     )
 
     weather_clean_data = BashOperator(
         task_id="weather_clean_data",
-        bash_command="""
-            set -e
-            mkdir -p "${CS9_PATH}"
-            cd "${CS9_PATH}"
-            git clone --depth 1 --branch main https://github.com/csids/cs9example.git
-            cd cs9example
-            /usr/local/bin/install_ss_and_run_task_k8s.sh https://github.com/csids/cs9example.git main weather_clean_data
-        """,
+        bash_command="/usr/local/bin/install_ss_and_run_task_k8s.sh https://github.com/csids/cs9example.git main weather_clean_data",
         executor_config=get_executor_config(),
     )
 
