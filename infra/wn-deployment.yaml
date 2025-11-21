@@ -73,9 +73,9 @@ spec:
           requests:
             cpu: 2000m
             memory: 4096Mi
-        volumeMounts:
-        - mountPath: /secrets/
-          name: volume-akv-secret-1
+        #volumeMounts:
+        #- mountPath: /secrets/
+        #  name: volume-akv-secret-1
       volumes:
       - csi:
           driver: secrets-store.csi.k8s.io
