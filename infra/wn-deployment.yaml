@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
 #      - image: tutum/hello-world
-      - image: ghcr.io/fhidev/fhi.fida.cs/skybert-workbench:latest
+      - image: ghcr.io/niphr/cs/rworkbench:4.5.1
         imagePullPolicy: Always
         name: ct-cs9
         ports:
