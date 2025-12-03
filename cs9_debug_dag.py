@@ -76,7 +76,7 @@ except ModuleNotFoundError:
 with DAG(
     dag_id="cs9_debug",
     start_date=datetime(2024, 1, 1),
-    schedule="@once",
+    schedule=None,
     catchup=False,
     tags=["cs9", "debug"],
 ) as dag:
