@@ -1,0 +1,88 @@
+from datetime import datetime
+
+from airflow import DAG
+from airflow.providers.standard.operators.bash import BashOperator
+
+# Service account for this DAG
+SERVICE_ACCOUNT_NAME = "airflow-worker-team-norsyss"
+
+# Environment variables for cs9 tasks
+# All variables are set here; tasks will access them via shell environment and pass to R via Sys.setenv()
+CS9_ENV_VARS = {
+    "CS9_DBCONFIG_USER": "norsyss_user",
+    "CS9_DBCONFIG_PASSWORD": "NorsyssTestPass!23#Secure",
+    "CS9_AUTO": "0",
+    "CS9_PATH": "/tmp/work",
+    "CS9_DBCONFIG_ACCESS": "config/anon",
+    "CS9_DBCONFIG_DRIVER": "PostgreSQL Unicode",
+    "CS9_DBCONFIG_PORT": "5432",
+    "CS9_DBCONFIG_SSLMODE": "require",
+    "CS9_DBCONFIG_ROLE_CREATE_TABLE": "norsyss_user",
+    "CS9_DBCONFIG_SERVER": "airflow-cs9-test.postgres.database.azure.com",
+    "CS9_DBCONFIG_SCHEMA_CONFIG": "public",
+    "CS9_DBCONFIG_DB_CONFIG": "norsyss_test",
+    "CS9_DBCONFIG_SCHEMA_ANON": "public",
+    "CS9_DBCONFIG_DB_ANON": "norsyss_test"
+}
+
+# Try to import kubernetes client. This is needed in the scheduler to construct executor configs,
+# but worker pods (which execute tasks) don't have the kubernetes library installed.
+# The try/except allows the DAG to be imported in both contexts.
+try:
+    from kubernetes.client import models as k8s
+
+    # Resource requirements for all cs9 tasks (must not exceed Kyverno policy: CPU <= 2, Memory <= 2Gi)
+    CS9_CONTAINER_RESOURCES = k8s.V1ResourceRequirements(
+        requests={"cpu": "500m", "memory": "1Gi"},
+        limits={"cpu": "1000m", "memory": "1Gi"}
+    )
+
+    def get_executor_config():
+        """Pod override config for Kubernetes Executor tasks."""
+        return {
+            "pod_override": k8s.V1Pod(
+                spec=k8s.V1PodSpec(
+                    security_context=k8s.V1PodSecurityContext(
+                        run_as_user=50000,
+                        fs_group=50000
+                    ),
+                    containers=[
+                        k8s.V1Container(
+                            name="base",
+                            image="ghcr.io/niphr/cs/rbase:4.5.1",
+                            image_pull_policy="Always",
+                            resources=CS9_CONTAINER_RESOURCES,
+                            env=[
+                                k8s.V1EnvVar(name=key, value=str(value))
+                                for key, value in CS9_ENV_VARS.items()
+                            ],
+                        )
+                    ],
+                    service_account_name=SERVICE_ACCOUNT_NAME,
+                    restart_policy="Never",
+                )
+            )
+        }
+
+except ModuleNotFoundError:
+    # Kubernetes client not available (e.g., in worker pods).
+    # Provide dummy implementations to allow DAG import to succeed.
+    CS9_CONTAINER_RESOURCES = None
+
+    def get_executor_config():
+        """Dummy implementation when kubernetes client is not available."""
+        return {}
+
+with DAG(
+    dag_id="cs9_debug",
+    start_date=datetime(2024, 1, 1),
+    schedule="@once",
+    catchup=False,
+    tags=["cs9", "debug"],
+) as dag:
+
+    debug_task = BashOperator(
+        task_id="debug_logging",
+        bash_command="echo 'DEBUG: Task started' && sleep 30 && echo 'DEBUG: Task completed after 30 seconds'",
+        executor_config=get_executor_config(),
+    )
