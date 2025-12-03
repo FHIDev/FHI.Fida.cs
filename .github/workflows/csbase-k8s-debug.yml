@@ -1,0 +1,51 @@
+name: Build csbase-k8s-debug for debugging
+
+env:
+  VERSION: debug
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: cs9base-k8s-debug
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: main
+
+    - name: Switch to cs9base-k8s-debug branch
+      run: git fetch && git checkout cs9base-k8s-debug
+
+    - name: Set lowercase repository name as environment variable
+      run: echo "REPO_NAME=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build the image
+      run: cd image && docker build . --tag ghcr.io/${{ env.REPO_NAME }}/cs9base-k8s-debug:${{ env.VERSION }} --tag ghcr.io/${{ env.REPO_NAME }}/cs9base-k8s-debug:latest
+
+    - name: Push the image to GHCR
+      run: docker push ghcr.io/${{ env.REPO_NAME }}/cs9base-k8s-debug:${{ env.VERSION }} && docker push ghcr.io/${{ env.REPO_NAME }}/cs9base-k8s-debug:latest
+
+    - name: Clean up untagged images
+      uses: actions/delete-package-versions@v5
+      with:
+        package-name: 'fhi.fida.cs/cs9base-k8s-debug'
+        package-type: 'container'
+        min-versions-to-keep: 0
+        delete-only-untagged-versions: 'true'
