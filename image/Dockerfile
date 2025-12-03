@@ -1,48 +1,23 @@
-FROM csids/cs9-su-csverse:4.4.1
-
-# Create python symlink for compatibility (python3 is installed, but some scripts expect python)
-RUN ln -s /usr/bin/python3 /usr/bin/python
+FROM python:3.10-slim
 
 # Create non-root 'airflow' user with UID 50000 and GID 50000
-# Required for Kubernetes Pod Security Standards compliance and principle of least privilege
 ARG AIRFLOW_UID=50000
 ARG AIRFLOW_GID=50000
 RUN groupadd -r -g ${AIRFLOW_GID} airflow && \
     useradd -r -u ${AIRFLOW_UID} -g ${AIRFLOW_GID} -s /bin/bash -m airflow
 
-# Copy config and startup
-COPY content/install_ss_and_run_task.sh /usr/local/bin/install_ss_and_run_task.sh
-COPY content/install_ss_and_run_task_k8s.sh /usr/local/bin/install_ss_and_run_task_k8s.sh
-RUN chmod +x /usr/local/bin/install_ss_and_run_task.sh
-RUN chmod +x /usr/local/bin/install_ss_and_run_task_k8s.sh
-
-### install extra packages
-RUN R -e 'devtools::install_github("norsyss/norsyss", upgrade="never")'
-
-### install surveillance systems
-RUN R -e 'devtools::install_github("csids/cs9example", upgrade="never")'
-
-### install RPostgres for PostgreSQL connectivity from R
-RUN R -e 'install.packages("RPostgres", repos="https://cran.r-project.org")'
-
-### install Airflow for Kubernetes execution (for Airflow 3.0+ compatibility)
-### Use official Airflow 3.1.0 constraints for known-good dependency versions
+# Install Airflow for Kubernetes execution
 RUN pip install --upgrade pip && \
-    pip install apache-airflow[kubernetes]==3.1.0 \
-      --constraint https://raw.githubusercontent.com/apache/airflow/constraints-3.1.0/constraints-3.10.txt && \
-    find /usr/local/lib/python3.10/dist-packages -type d -exec chmod 755 {} \; && \
-    find /usr/local/lib/python3.10/dist-packages -type f -exec chmod 644 {} \;
+    pip install apache-airflow[kubernetes]==3.1.1 \
+      --constraint https://raw.githubusercontent.com/apache/airflow/constraints-3.1.1/constraints-3.10.txt
 
-### Set AIRFLOW_HOME to /tmp/airflow for ephemeral worker pods
-### This allows any UID to import airflow without permission issues
+# Set AIRFLOW_HOME for ephemeral worker pods
 ENV AIRFLOW_HOME=/tmp/airflow
 
-# Ensure airflow user owns necessary directories and can write to them
+# Setup airflow directories
 RUN mkdir -p /tmp/airflow && \
     chown -R airflow:airflow /tmp/airflow && \
-    chmod -R 750 /tmp/airflow && \
-    chown -R airflow:airflow /opt/airflow 2>/dev/null || true && \
-    chmod -R 750 /opt/airflow 2>/dev/null || true
+    chmod -R 750 /tmp/airflow
 
-# Switch to non-root airflow user for all subsequent operations
+# Switch to non-root airflow user
 USER airflow
