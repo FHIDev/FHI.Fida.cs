@@ -49,7 +49,7 @@ try:
                     containers=[
                         k8s.V1Container(
                             name="base",
-                            image="ghcr.io/niphr/cs/rbase:4.5.1",
+                            image="ghcr.io/fhidev/fhi.fida.cs/cs9base-k8s-debug:debug",
                             image_pull_policy="Always",
                             resources=CS9_CONTAINER_RESOURCES,
                             env=[
