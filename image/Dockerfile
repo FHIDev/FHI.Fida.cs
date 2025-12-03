@@ -9,6 +9,7 @@ RUN groupadd -r -g ${AIRFLOW_GID} airflow && \
 # Install Airflow for Kubernetes execution
 RUN pip install --upgrade pip && \
     pip install apache-airflow[kubernetes]==3.1.1 \
+      apache-airflow-providers-microsoft-azure \
       --constraint https://raw.githubusercontent.com/apache/airflow/constraints-3.1.1/constraints-3.10.txt
 
 # Set AIRFLOW_HOME for ephemeral worker pods
