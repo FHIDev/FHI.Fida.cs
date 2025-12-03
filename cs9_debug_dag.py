@@ -74,24 +74,15 @@ except ModuleNotFoundError:
         return {}
 
 with DAG(
-    dag_id="cs9example_weather_download",
+    dag_id="cs9_debug",
     start_date=datetime(2024, 1, 1),
-    schedule="0 * * * *",
+    schedule="@once",
     catchup=False,
-    tags=["cs9", "weather", "example"],
+    tags=["cs9", "debug"],
 ) as dag:
 
-    weather_download_and_import_rawdata = BashOperator(
-        task_id="weather_download_and_import_rawdata",
-        bash_command="/usr/local/bin/install_ss_and_run_task_k8s.sh https://github.com/csids/cs9example.git main weather_download_and_import_rawdata",
+    debug_task = BashOperator(
+        task_id="debug_logging",
+        bash_command="echo 'DEBUG: Task started' && sleep 30 && echo 'DEBUG: Task completed after 30 seconds'",
         executor_config=get_executor_config(),
     )
-
-    weather_clean_data = BashOperator(
-        task_id="weather_clean_data",
-        bash_command="/usr/local/bin/install_ss_and_run_task_k8s.sh https://github.com/csids/cs9example.git main weather_clean_data",
-        executor_config=get_executor_config(),
-    )
-
-    # Task dependencies
-    weather_download_and_import_rawdata >> weather_clean_data
